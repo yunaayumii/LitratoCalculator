@@ -1,77 +1,83 @@
-# React + TypeScript + Vite
+# 📸 Litrato Studio Profit Calculator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Instant, zero-clutter financial decision tool for Litrato Studio.**  
+> 🌐 **Live Application:** [https://litrato-calculator.vercel.app/](https://litrato-calculator.vercel.app/)
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Overview
 
-## React Compiler
+**Litrato Studio Profit Calculator** is a specialized, mobile-first web application designed to help **Litrato Photography Studio** make immediate pricing and profitability projections for event packages and rentals.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Built with **React 19 + TypeScript + Vite** and deployed directly on **Vercel**, the calculator requires zero databases, zero backend setup, and operates with zero network lag—all calculations happen synchronously inside the browser render loop.
 
-Note: This will impact Vite dev & build performances.
+---
 
-## Expanding the ESLint configuration
+## ✨ Key Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 📱 **100% Viewport Limit (Zero Vertical Scrolling)**  
+  Designed specifically for mobile devices (`100vh` / `100svh`). All factors, prominent profit projections, and action buttons fit cleanly on a single screen without requiring the user to scroll up or down.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- 👵 **Boomer-Friendly & Ultra-Intuitive Typography**  
+  Features extra-large typography, high-contrast charcoal text (`#0f172a`) on crisp white cards (`#ffffff`), and conversational wording (*"Package Price"*, *"Photo Prints"*, *"Staff Helpers"*, *"Gas & Travel"*).
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- 🎨 **Modern Light Green QC Aesthetic**  
+  Inspired by clean mobile procedure wizards, featuring soft circular/pill minus (`-`) grey steppers and vibrant emerald green plus (`+`) steppers (`#059669`).
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- ⚙️ **Dual-Factor Dynamic Adjusters**  
+  No hidden hardcoded constants! Every operational factor can be modified on the fly using either one-tap steppers or direct numeric input:
+  - **1. Package Price**: Adjust revenue in steps of `₱1,000` or type any amount directly.
+  - **2. Photo Prints**: Independently adjust both **Volume (`printQty`)** and **Cost per Print (`printCost`)**.
+  - **3. Staff Helpers**: Independently adjust both **Headcount (`employeeCount`)** and **Pay per Helper (`employeeCost`)**.
+  - **4. Gas & Travel**: Adjust flat travel/gas fees in steps of `₱200` or type directly.
 
+- 🇵🇭 **Single Currency (`₱` PHP Exclusively)**  
+  Streamlined exclusively for Philippine Pesos to eliminate confusing currency toggles.
+
+- 📋 **One-Click Summary Sharing**  
+  Includes a **Copy Summary** button that formats the financial breakdown into a clean, emoji-styled text summary ready to be pasted directly into SMS, Viber, or WhatsApp.
+
+---
+
+## 🚀 Quick Start & Local Development
+
+### 1. Prerequisites
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- `npm`
+
+### 2. Installation
+Clone the repository and install dependencies:
+```bash
+git clone https://github.com/yunaayumii/LitratoCalculator.git
+cd LitratoCalculator
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+### 3. Run Development Server
+Start the Vite local development server:
+```bash
+npm run dev
 ```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+### 4. Build for Production
+To verify TypeScript types and create a production bundle:
+```bash
+npm run build
+```
+The static output will be generated in the `/dist` directory, ready for immediate deployment on **Vercel**.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Framework**: React 19 + TypeScript (`vite` template)
+- **Styling**: Bespoke Vanilla CSS (`src/index.css`) enforcing strict 100% viewport single-screen geometry
+- **Icons**: `lucide-react`
+- **Hosting / Deployment**: [Vercel](https://vercel.com/) (Static SPA)
+
+---
+
+## 📄 License
+
+All rights reserved — **Litrato Photography Studio**.
