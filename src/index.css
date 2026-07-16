@@ -94,29 +94,6 @@ html, body {
   color: var(--accent-gold);
 }
 
-.currency-switcher {
-  display: flex;
-  gap: 6px;
-}
-
-.currency-btn {
-  background: var(--bg-surface-elevated);
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border-color);
-  padding: 4px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.85rem;
-  transition: all var(--transition-fast);
-}
-
-.currency-btn.active {
-  background: var(--accent-gold);
-  color: var(--bg-main);
-  border-color: var(--accent-gold);
-}
-
 /* Top Prominent Profit Dashboard Card */
 .dashboard-card {
   flex: 0 0 auto;

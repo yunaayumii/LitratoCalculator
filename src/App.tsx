@@ -7,8 +7,8 @@ import {
 } from 'lucide-react';
 
 function App() {
-  // Config state
-  const [currency, setCurrency] = useState<'₱' | '$'>('₱');
+  // Fixed currency symbol (Philippine Peso only)
+  const currency = '₱';
 
   // Input states
   const [rentalPrice, setRentalPrice] = useState<number>(15000);
@@ -99,26 +99,10 @@ function App() {
       </div>
 
       {/* Compact Header Bar */}
-      <header className="app-header">
+      <header className="app-header" style={{ justifyContent: 'center' }}>
         <div className="logo-container">
-          <Camera size={20} color="var(--accent-gold)" />
+          <Camera size={22} color="var(--accent-gold)" />
           <span className="logo-text">LITRATO STUDIO</span>
-        </div>
-        <div className="currency-switcher">
-          <button 
-            type="button" 
-            className={`currency-btn ${currency === '₱' ? 'active' : ''}`}
-            onClick={() => setCurrency('₱')}
-          >
-            ₱ PHP
-          </button>
-          <button 
-            type="button" 
-            className={`currency-btn ${currency === '$' ? 'active' : ''}`}
-            onClick={() => setCurrency('$')}
-          >
-            $ USD
-          </button>
         </div>
       </header>
 
