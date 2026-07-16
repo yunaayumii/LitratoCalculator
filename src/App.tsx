@@ -101,7 +101,7 @@ function App() {
       {/* Compact Header Bar */}
       <header className="app-header" style={{ justifyContent: 'center' }}>
         <div className="logo-container">
-          <Camera size={22} color="var(--accent-gold)" />
+          <Camera size={22} color="var(--accent-green)" />
           <span className="logo-text">LITRATO STUDIO</span>
         </div>
       </header>
@@ -116,7 +116,7 @@ function App() {
         <div className="dashboard-subbar">
           <div className="subbar-item">
             <span className="subbar-label">REVENUE</span>
-            <span className="subbar-val" style={{ color: 'var(--accent-gold)' }}>{formatVal(rentalPrice)}</span>
+            <span className="subbar-val" style={{ color: 'var(--accent-green)' }}>{formatVal(rentalPrice)}</span>
           </div>
           <div className="subbar-item">
             <span className="subbar-label">EXPENSES</span>
@@ -136,7 +136,7 @@ function App() {
           <div className="factor-info">
             <span className="factor-title">1. Package Price</span>
             <div className="factor-input-wrapper">
-              <span style={{ color: 'var(--accent-gold)', fontWeight: 800 }}>{currency}</span>
+              <span style={{ color: 'var(--accent-green)', fontWeight: 800 }}>{currency}</span>
               <input 
                 type="number" 
                 className="factor-input" 
@@ -147,8 +147,8 @@ function App() {
             </div>
           </div>
           <div className="row-steppers">
-            <button type="button" className="stepper-btn" onClick={() => setRentalPrice(Math.max(0, rentalPrice - 1000))}>- 1k</button>
-            <button type="button" className="stepper-btn" onClick={() => setRentalPrice(rentalPrice + 1000)}>+ 1k</button>
+            <button type="button" className="stepper-btn stepper-minus" onClick={() => setRentalPrice(Math.max(0, rentalPrice - 1000))}>- 1k</button>
+            <button type="button" className="stepper-btn stepper-plus" onClick={() => setRentalPrice(rentalPrice + 1000)}>+ 1k</button>
           </div>
         </div>
 
@@ -159,8 +159,8 @@ function App() {
             <span className="factor-desc">{printQty} pcs @ {formatVal(printCost)} ({formatVal(totalPrintsCost)})</span>
           </div>
           <div className="row-steppers">
-            <button type="button" className="stepper-btn" onClick={() => setPrintQty(Math.max(0, printQty - 20))} title="Less prints">- 20</button>
-            <button type="button" className="stepper-btn" onClick={() => setPrintQty(printQty + 20)} title="More prints">+ 20</button>
+            <button type="button" className="stepper-btn stepper-minus" onClick={() => setPrintQty(Math.max(0, printQty - 20))} title="Less prints">- 20</button>
+            <button type="button" className="stepper-btn stepper-plus" onClick={() => setPrintQty(printQty + 20)} title="More prints">+ 20</button>
           </div>
         </div>
 
@@ -171,8 +171,8 @@ function App() {
             <span className="factor-desc">{employeeCount} staff @ {formatVal(employeeCost)} ({formatVal(totalEmployeesCost)})</span>
           </div>
           <div className="row-steppers">
-            <button type="button" className="stepper-btn" onClick={() => setEmployeeCount(Math.max(0, employeeCount - 1))} title="Remove assistant">- 1</button>
-            <button type="button" className="stepper-btn" onClick={() => setEmployeeCount(employeeCount + 1)} title="Add assistant">+ 1</button>
+            <button type="button" className="stepper-btn stepper-minus" onClick={() => setEmployeeCount(Math.max(0, employeeCount - 1))} title="Remove assistant">- 1</button>
+            <button type="button" className="stepper-btn stepper-plus" onClick={() => setEmployeeCount(employeeCount + 1)} title="Add assistant">+ 1</button>
           </div>
         </div>
 
@@ -181,7 +181,7 @@ function App() {
           <div className="factor-info">
             <span className="factor-title">4. Gas & Travel</span>
             <div className="factor-input-wrapper">
-              <span style={{ color: 'var(--accent-gold)', fontWeight: 800 }}>{currency}</span>
+              <span style={{ color: 'var(--accent-green)', fontWeight: 800 }}>{currency}</span>
               <input 
                 type="number" 
                 className="factor-input" 
@@ -192,8 +192,8 @@ function App() {
             </div>
           </div>
           <div className="row-steppers">
-            <button type="button" className="stepper-btn" onClick={() => setTransportCost(Math.max(0, transportCost - 200))}>- 200</button>
-            <button type="button" className="stepper-btn" onClick={() => setTransportCost(transportCost + 200)}>+ 200</button>
+            <button type="button" className="stepper-btn stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))}>- 200</button>
+            <button type="button" className="stepper-btn stepper-plus" onClick={() => setTransportCost(transportCost + 200)}>+ 200</button>
           </div>
         </div>
       </main>
