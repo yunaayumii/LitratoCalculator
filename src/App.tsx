@@ -152,27 +152,93 @@ function App() {
           </div>
         </div>
 
-        {/* Row 2: Photo Prints */}
-        <div className="factor-row">
-          <div className="factor-info">
-            <span className="factor-title">2. Photo Prints</span>
-            <span className="factor-desc">{printQty} pcs @ {formatVal(printCost)} ({formatVal(totalPrintsCost)})</span>
+        {/* Row 2: Photo Prints (Volume & Cost per Print) */}
+        <div className="factor-row-dual">
+          <div className="dual-header">
+            <span className="dual-title">2. Photo Prints</span>
+            <span className="dual-badge">Total: {formatVal(totalPrintsCost)}</span>
           </div>
-          <div className="row-steppers">
-            <button type="button" className="stepper-btn stepper-minus" onClick={() => setPrintQty(Math.max(0, printQty - 20))} title="Less prints">- 20</button>
-            <button type="button" className="stepper-btn stepper-plus" onClick={() => setPrintQty(printQty + 20)} title="More prints">+ 20</button>
+          <div className="dual-controls-grid">
+            {/* Volume / Quantity */}
+            <div className="dual-control-item">
+              <span className="dual-control-label">Volume (pcs)</span>
+              <div className="dual-stepper-box">
+                <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintQty(Math.max(0, printQty - 20))} title="Less prints">-</button>
+                <div className="dual-input-span">
+                  <input 
+                    type="number" 
+                    className="dual-input" 
+                    value={printQty === 0 ? '' : printQty} 
+                    onChange={(e) => setPrintQty(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintQty(printQty + 20)} title="More prints">+</button>
+              </div>
+            </div>
+            {/* Cost per unit */}
+            <div className="dual-control-item">
+              <span className="dual-control-label">Cost per Print</span>
+              <div className="dual-stepper-box">
+                <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintCost(Math.max(0, printCost - 1))} title="Lower print cost">-</button>
+                <div className="dual-input-span">
+                  <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                  <input 
+                    type="number" 
+                    className="dual-input" 
+                    value={printCost === 0 ? '' : printCost} 
+                    onChange={(e) => setPrintCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintCost(printCost + 1)} title="Higher print cost">+</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Row 3: Staff / Assistants */}
-        <div className="factor-row">
-          <div className="factor-info">
-            <span className="factor-title">3. Staff Helpers</span>
-            <span className="factor-desc">{employeeCount} staff @ {formatVal(employeeCost)} ({formatVal(totalEmployeesCost)})</span>
+        {/* Row 3: Staff Helpers (Headcount & Pay Rate) */}
+        <div className="factor-row-dual">
+          <div className="dual-header">
+            <span className="dual-title">3. Staff Helpers</span>
+            <span className="dual-badge">Total: {formatVal(totalEmployeesCost)}</span>
           </div>
-          <div className="row-steppers">
-            <button type="button" className="stepper-btn stepper-minus" onClick={() => setEmployeeCount(Math.max(0, employeeCount - 1))} title="Remove assistant">- 1</button>
-            <button type="button" className="stepper-btn stepper-plus" onClick={() => setEmployeeCount(employeeCount + 1)} title="Add assistant">+ 1</button>
+          <div className="dual-controls-grid">
+            {/* Headcount */}
+            <div className="dual-control-item">
+              <span className="dual-control-label">Headcount</span>
+              <div className="dual-stepper-box">
+                <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCount(Math.max(0, employeeCount - 1))} title="Remove assistant">-</button>
+                <div className="dual-input-span">
+                  <input 
+                    type="number" 
+                    className="dual-input" 
+                    value={employeeCount === 0 ? '' : employeeCount} 
+                    onChange={(e) => setEmployeeCount(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setEmployeeCount(employeeCount + 1)} title="Add assistant">+</button>
+              </div>
+            </div>
+            {/* Pay rate per helper */}
+            <div className="dual-control-item">
+              <span className="dual-control-label">Pay per Helper</span>
+              <div className="dual-stepper-box">
+                <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCost(Math.max(0, employeeCost - 50))} title="Lower pay">-</button>
+                <div className="dual-input-span">
+                  <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                  <input 
+                    type="number" 
+                    className="dual-input" 
+                    value={employeeCost === 0 ? '' : employeeCost} 
+                    onChange={(e) => setEmployeeCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setEmployeeCost(employeeCost + 50)} title="Higher pay">+</button>
+              </div>
+            </div>
           </div>
         </div>
 
