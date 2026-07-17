@@ -642,24 +642,28 @@ html, body {
   color: var(--accent-green);
 }
 
-/* Toast message notification */
+/* Toast message notification (vibrant emerald green with no black background) */
 .toast-msg {
   position: fixed;
   bottom: 70px;
   left: 50%;
   transform: translateX(-50%) translateY(100px);
-  background: var(--text-primary);
+  background: var(--accent-green);
   color: #ffffff;
   padding: 12px 24px;
   border-radius: 9999px;
   font-weight: 800;
   font-size: 0.95rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.35);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 100;
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .toast-msg.show {
   transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  visibility: visible;
 }
