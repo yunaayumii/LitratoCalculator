@@ -27,6 +27,7 @@ function App() {
   const [employeeCost, setEmployeeCost] = useState<number>(500);
   const [employeeCount, setEmployeeCount] = useState<number>(2);
   const [transportCost, setTransportCost] = useState<number>(1000);
+  const [miscCost, setMiscCost] = useState<number>(500);
 
   // Toast state
   const [toastMessage, setToastMessage] = useState<string>('');
@@ -44,7 +45,7 @@ function App() {
   // Math logic: Mode 1 (Package Rental)
   const tab1PrintsCost = printCost * printQty;
   const tab1EmployeesCost = employeeCost * employeeCount;
-  const tab1TotalExpenses = tab1PrintsCost + tab1EmployeesCost + transportCost;
+  const tab1TotalExpenses = tab1PrintsCost + tab1EmployeesCost + transportCost + miscCost;
   const tab1NetProfit = rentalPrice - tab1TotalExpenses;
   const tab1ProfitMargin = rentalPrice > 0 ? (tab1NetProfit / rentalPrice) * 100 : 0;
 
@@ -52,13 +53,13 @@ function App() {
   const tab2Revenue = sellingPricePerPrint * printsSoldQty;
   const tab2PrintProdCost = printCost * printsSoldQty;
   const tab2StaffCost = employeeCost * employeeCount;
-  const tab2TotalExpenses = spaceRentalCost + tab2PrintProdCost + tab2StaffCost + transportCost;
+  const tab2TotalExpenses = spaceRentalCost + tab2PrintProdCost + tab2StaffCost + transportCost + miscCost;
   const tab2NetProfit = tab2Revenue - tab2TotalExpenses;
   const tab2ProfitMargin = tab2Revenue > 0 ? (tab2NetProfit / tab2Revenue) * 100 : 0;
 
-  // Break-even copies needed to cover fixed overhead (space + staff + travel)
+  // Break-even copies needed to cover fixed overhead (space + staff + travel + misc)
   const breakEvenCopies = (sellingPricePerPrint - printCost) > 0 
-    ? Math.ceil((spaceRentalCost + tab2StaffCost + transportCost) / (sellingPricePerPrint - printCost)) 
+    ? Math.ceil((spaceRentalCost + tab2StaffCost + transportCost + miscCost) / (sellingPricePerPrint - printCost)) 
     : 0;
 
   // Active dashboard metrics
@@ -83,6 +84,7 @@ function App() {
 • Photo Prints (${printQty} pcs @ ${formatVal(printCost)}): ${formatVal(tab1PrintsCost)}
 • Staff / Assistants (${employeeCount} people @ ${formatVal(employeeCost)}): ${formatVal(tab1EmployeesCost)}
 • Gas & Travel: ${formatVal(transportCost)}
+• Misc Fees: ${formatVal(miscCost)}
 
 📊 TOTAL EXPENSES: ${formatVal(tab1TotalExpenses)}
 💰 YOUR TAKE-HOME PROFIT: ${formatVal(tab1NetProfit)}
@@ -97,6 +99,7 @@ function App() {
 • Print Production (${printsSoldQty} copies @ ${formatVal(printCost)}): ${formatVal(tab2PrintProdCost)}
 • Staff / Assistants (${employeeCount} people @ ${formatVal(employeeCost)}): ${formatVal(tab2StaffCost)}
 • Gas & Travel: ${formatVal(transportCost)}
+• Misc Fees: ${formatVal(miscCost)}
 
 📊 TOTAL EXPENSES: ${formatVal(tab2TotalExpenses)}
 🎯 BREAK-EVEN POINT: ${breakEvenCopies} copies sold
@@ -121,6 +124,7 @@ function App() {
       setEmployeeCost(500);
       setEmployeeCount(2);
       setTransportCost(1000);
+      setMiscCost(500);
       triggerToast('Reset Package Rental defaults');
     } else {
       setSellingPricePerPrint(150);
@@ -130,6 +134,7 @@ function App() {
       setEmployeeCost(500);
       setEmployeeCount(2);
       setTransportCost(1000);
+      setMiscCost(500);
       triggerToast('Reset Retail Booth defaults');
     }
   };
@@ -342,6 +347,27 @@ function App() {
                 <button type="button" className="stepper-btn stepper-plus" onClick={() => setTransportCost(transportCost + 200)}>+ 200</button>
               </div>
             </div>
+
+            {/* Mode 1 - Row 5: Miscellaneous Fees */}
+            <div className="factor-row expense-row">
+              <div className="factor-info">
+                <span className="factor-title">5. Misc Fees</span>
+                <div className="factor-input-wrapper">
+                  <span className="currency-symbol">{currency}</span>
+                  <input 
+                    type="number" 
+                    className="factor-input" 
+                    value={miscCost === 0 ? '' : miscCost} 
+                    onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="row-steppers">
+                <button type="button" className="stepper-btn stepper-minus" onClick={() => setMiscCost(Math.max(0, miscCost - 100))}>- 100</button>
+                <button type="button" className="stepper-btn stepper-plus" onClick={() => setMiscCost(miscCost + 100)}>+ 100</button>
+              </div>
+            </div>
           </>
         ) : (
           <>
@@ -501,6 +527,27 @@ function App() {
                     <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setTransportCost(transportCost + 200)} title="Higher travel cost">+</button>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Mode 2 - Row 5: Miscellaneous Fees */}
+            <div className="factor-row expense-row">
+              <div className="factor-info">
+                <span className="factor-title">5. Misc Fees</span>
+                <div className="factor-input-wrapper">
+                  <span className="currency-symbol">{currency}</span>
+                  <input 
+                    type="number" 
+                    className="factor-input" 
+                    value={miscCost === 0 ? '' : miscCost} 
+                    onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="row-steppers">
+                <button type="button" className="stepper-btn stepper-minus" onClick={() => setMiscCost(Math.max(0, miscCost - 100))}>- 100</button>
+                <button type="button" className="stepper-btn stepper-plus" onClick={() => setMiscCost(miscCost + 100)}>+ 100</button>
               </div>
             </div>
           </>
