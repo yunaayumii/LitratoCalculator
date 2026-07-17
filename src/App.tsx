@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { 
-  Camera, 
-  Copy, 
-  RefreshCw, 
+import {
+  Camera,
+  Copy,
+  RefreshCw,
   CheckCircle2
 } from 'lucide-react';
 
@@ -11,15 +11,18 @@ function App() {
   const currency = '₱';
 
   // Active mode switcher tab
-  const [activeTab, setActiveTab] = useState<'package' | 'retail'>('package');
+  const [activeTab, setActiveTab] = useState<'package' | 'retail' | 'percent'>('package');
 
   // Mode 1 (Package Rental) Input states
   const [rentalPrice, setRentalPrice] = useState<number>(15000);
-  
+
   // Mode 2 (Retail Booth / Copies) Input states
   const [sellingPricePerPrint, setSellingPricePerPrint] = useState<number>(150);
   const [printsSoldQty, setPrintsSoldQty] = useState<number>(150);
   const [spaceRentalCost, setSpaceRentalCost] = useState<number>(3500);
+
+  // Mode 3 (Percentage Cut) Input states
+  const [commissionRate, setCommissionRate] = useState<number>(20); // e.g. 20% cut to the organizer
 
   // Shared / Operational factor states
   const [printCost, setPrintCost] = useState<number>(12);
@@ -57,16 +60,25 @@ function App() {
   const tab2NetProfit = tab2Revenue - tab2TotalExpenses;
   const tab2ProfitMargin = tab2Revenue > 0 ? (tab2NetProfit / tab2Revenue) * 100 : 0;
 
+  // Math logic: Mode 3 (Percentage Cut Mode)
+  const tab3GrossRevenue = sellingPricePerPrint * printsSoldQty;
+  const tab3OrganizerCut = tab3GrossRevenue * (commissionRate / 100);
+  const tab3PrintProdCost = printCost * printsSoldQty;
+  const tab3StaffCost = employeeCost * employeeCount;
+  const tab3TotalExpenses = tab3OrganizerCut + tab3PrintProdCost + tab3StaffCost + transportCost + miscCost;
+  const tab3NetProfit = tab3GrossRevenue - tab3TotalExpenses;
+  const tab3ProfitMargin = tab3GrossRevenue > 0 ? (tab3NetProfit / tab3GrossRevenue) * 100 : 0;
+
   // Break-even copies needed to cover fixed overhead (space + staff + travel + misc)
-  const breakEvenCopies = (sellingPricePerPrint - printCost) > 0 
-    ? Math.ceil((spaceRentalCost + tab2StaffCost + transportCost + miscCost) / (sellingPricePerPrint - printCost)) 
+  const breakEvenCopies = (sellingPricePerPrint - printCost) > 0
+    ? Math.ceil((spaceRentalCost + tab2StaffCost + transportCost + miscCost) / (sellingPricePerPrint - printCost))
     : 0;
 
   // Active dashboard metrics
-  const currentRevenue = activeTab === 'package' ? rentalPrice : tab2Revenue;
-  const currentExpenses = activeTab === 'package' ? tab1TotalExpenses : tab2TotalExpenses;
-  const currentNetProfit = activeTab === 'package' ? tab1NetProfit : tab2NetProfit;
-  const currentProfitMargin = activeTab === 'package' ? tab1ProfitMargin : tab2ProfitMargin;
+  const currentRevenue = activeTab === 'package' ? rentalPrice : activeTab === 'retail' ? tab2Revenue : tab3GrossRevenue;
+  const currentExpenses = activeTab === 'package' ? tab1TotalExpenses : activeTab === 'retail' ? tab2TotalExpenses : tab3TotalExpenses;
+  const currentNetProfit = activeTab === 'package' ? tab1NetProfit : activeTab === 'retail' ? tab2NetProfit : tab3NetProfit;
+  const currentProfitMargin = activeTab === 'package' ? tab1ProfitMargin : activeTab === 'retail' ? tab2ProfitMargin : tab3ProfitMargin;
 
   // Format currency helper
   const formatVal = (val: number) => {
@@ -90,7 +102,7 @@ function App() {
 💰 YOUR TAKE-HOME PROFIT: ${formatVal(tab1NetProfit)}
 📈 PROFIT MARGIN: ${tab1ProfitMargin.toFixed(1)}%
 --------------------------------------`;
-    } else {
+    } else if (activeTab === 'retail') {
       reportText = `🏪 --- LITRATO RETAIL BOOTH REPORT ---
 💵 Photo Sales (${printsSoldQty} copies @ ${formatVal(sellingPricePerPrint)}): ${formatVal(tab2Revenue)}
 
@@ -105,6 +117,21 @@ function App() {
 🎯 BREAK-EVEN POINT: ${breakEvenCopies} copies sold
 💰 YOUR TAKE-HOME PROFIT: ${formatVal(tab2NetProfit)}
 📈 PROFIT MARGIN: ${tab2ProfitMargin.toFixed(1)}%
+--------------------------------------`;
+    } else {
+      reportText = `✂️ --- LITRATO PERCENTAGE CUT REPORT ---
+💵 Gross Photo Sales (${printsSoldQty} copies @ ${formatVal(sellingPricePerPrint)}): ${formatVal(tab3GrossRevenue)}
+
+💸 EXPENSES BREAKDOWN:
+• Organizer Cut (${commissionRate}%): ${formatVal(tab3OrganizerCut)}
+• Print Production (${printsSoldQty} copies @ ${formatVal(printCost)}): ${formatVal(tab3PrintProdCost)}
+• Staff / Assistants (${employeeCount} people @ ${formatVal(employeeCost)}): ${formatVal(tab3StaffCost)}
+• Gas & Travel: ${formatVal(transportCost)}
+• Misc Fees: ${formatVal(miscCost)}
+
+📊 TOTAL EXPENSES: ${formatVal(tab3TotalExpenses)}
+💰 YOUR TAKE-HOME PROFIT: ${formatVal(tab3NetProfit)}
+📈 PROFIT MARGIN: ${tab3ProfitMargin.toFixed(1)}%
 --------------------------------------`;
     }
 
@@ -126,7 +153,7 @@ function App() {
       setTransportCost(1000);
       setMiscCost(500);
       triggerToast('Reset Package Rental defaults');
-    } else {
+    } else if (activeTab === 'retail') {
       setSellingPricePerPrint(150);
       setPrintsSoldQty(150);
       setSpaceRentalCost(3500);
@@ -136,6 +163,16 @@ function App() {
       setTransportCost(1000);
       setMiscCost(500);
       triggerToast('Reset Retail Booth defaults');
+    } else {
+      setSellingPricePerPrint(150);
+      setPrintsSoldQty(150);
+      setCommissionRate(20);
+      setPrintCost(12);
+      setEmployeeCost(500);
+      setEmployeeCount(2);
+      setTransportCost(1000);
+      setMiscCost(500);
+      triggerToast('Reset Percentage Cut defaults');
     }
   };
 
@@ -164,19 +201,26 @@ function App() {
 
       {/* Tab Bar Mode Switcher */}
       <nav className="tab-bar">
-        <button 
-          type="button" 
+        <button
+          type="button"
           className={`tab-btn ${activeTab === 'package' ? 'active' : ''}`}
           onClick={() => setActiveTab('package')}
         >
           💼 Package Rental
         </button>
-        <button 
-          type="button" 
+        <button
+          type="button"
           className={`tab-btn ${activeTab === 'retail' ? 'active' : ''}`}
           onClick={() => setActiveTab('retail')}
         >
-          🏪 Retail Booth (Copies)
+          🏪 Retail Booth
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'percent' ? 'active' : ''}`}
+          onClick={() => setActiveTab('percent')}
+        >
+          ✂️ Percentage Cut
         </button>
       </nav>
 
@@ -191,7 +235,7 @@ function App() {
             🎯 Break-even: {breakEvenCopies} copies sold
           </div>
         )}
-        
+
         <div className="dashboard-subbar">
           <div className="subbar-item">
             <span className="subbar-label">REVENUE</span>
@@ -222,10 +266,10 @@ function App() {
                 <span className="factor-title">1. Package Price</span>
                 <div className="factor-input-wrapper">
                   <span className="currency-symbol">{currency}</span>
-                  <input 
-                    type="number" 
-                    className="factor-input" 
-                    value={rentalPrice === 0 ? '' : rentalPrice} 
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={rentalPrice === 0 ? '' : rentalPrice}
                     onChange={(e) => setRentalPrice(Math.max(0, parseFloat(e.target.value) || 0))}
                     placeholder="0"
                   />
@@ -253,10 +297,10 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintQty(Math.max(0, printQty - 20))} title="Less prints">-</button>
                     <div className="dual-input-span">
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={printQty === 0 ? '' : printQty} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={printQty === 0 ? '' : printQty}
                         onChange={(e) => setPrintQty(Math.max(0, parseInt(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -270,10 +314,10 @@ function App() {
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintCost(Math.max(0, printCost - 1))} title="Lower print cost">-</button>
                     <div className="dual-input-span">
                       <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={printCost === 0 ? '' : printCost} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={printCost === 0 ? '' : printCost}
                         onChange={(e) => setPrintCost(Math.max(0, parseFloat(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -296,10 +340,10 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCount(Math.max(0, employeeCount - 1))} title="Remove assistant">-</button>
                     <div className="dual-input-span">
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={employeeCount === 0 ? '' : employeeCount} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={employeeCount === 0 ? '' : employeeCount}
                         onChange={(e) => setEmployeeCount(Math.max(0, parseInt(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -313,10 +357,10 @@ function App() {
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCost(Math.max(0, employeeCost - 50))} title="Lower pay">-</button>
                     <div className="dual-input-span">
                       <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={employeeCost === 0 ? '' : employeeCost} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={employeeCost === 0 ? '' : employeeCost}
                         onChange={(e) => setEmployeeCost(Math.max(0, parseFloat(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -333,10 +377,10 @@ function App() {
                 <span className="factor-title">4. Gas & Travel</span>
                 <div className="factor-input-wrapper">
                   <span className="currency-symbol">{currency}</span>
-                  <input 
-                    type="number" 
-                    className="factor-input" 
-                    value={transportCost === 0 ? '' : transportCost} 
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={transportCost === 0 ? '' : transportCost}
                     onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
                     placeholder="0"
                   />
@@ -354,10 +398,10 @@ function App() {
                 <span className="factor-title">5. Misc Fees</span>
                 <div className="factor-input-wrapper">
                   <span className="currency-symbol">{currency}</span>
-                  <input 
-                    type="number" 
-                    className="factor-input" 
-                    value={miscCost === 0 ? '' : miscCost} 
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={miscCost === 0 ? '' : miscCost}
                     onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
                     placeholder="0"
                   />
@@ -369,7 +413,7 @@ function App() {
               </div>
             </div>
           </>
-        ) : (
+        ) : activeTab === 'retail' ? (
           <>
             <div className="section-divider revenue-divider">
               <span>💵 REVENUE & INCOME</span>
@@ -388,10 +432,10 @@ function App() {
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setSellingPricePerPrint(Math.max(0, sellingPricePerPrint - 10))} title="Lower price">-</button>
                     <div className="dual-input-span">
                       <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={sellingPricePerPrint === 0 ? '' : sellingPricePerPrint} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={sellingPricePerPrint === 0 ? '' : sellingPricePerPrint}
                         onChange={(e) => setSellingPricePerPrint(Math.max(0, parseFloat(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -404,10 +448,10 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintsSoldQty(Math.max(0, printsSoldQty - 10))} title="Less copies">-</button>
                     <div className="dual-input-span">
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={printsSoldQty === 0 ? '' : printsSoldQty} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={printsSoldQty === 0 ? '' : printsSoldQty}
                         onChange={(e) => setPrintsSoldQty(Math.max(0, parseInt(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -428,10 +472,10 @@ function App() {
                 <span className="factor-title">2. Space Rental Fee</span>
                 <div className="factor-input-wrapper">
                   <span className="currency-symbol">{currency}</span>
-                  <input 
-                    type="number" 
-                    className="factor-input" 
-                    value={spaceRentalCost === 0 ? '' : spaceRentalCost} 
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={spaceRentalCost === 0 ? '' : spaceRentalCost}
                     onChange={(e) => setSpaceRentalCost(Math.max(0, parseFloat(e.target.value) || 0))}
                     placeholder="0"
                   />
@@ -443,22 +487,22 @@ function App() {
               </div>
             </div>
 
-            {/* Mode 2 - Row 3: Staff Helpers (Headcount & Pay Rate) */}
+            {/* Mode 2 - Row 3: Staff Helpers + Print Production Cost (Dual Card) */}
             <div className="factor-row-dual expense-row">
               <div className="dual-header">
-                <span className="dual-title">3. Staff Helpers</span>
-                <span className="dual-badge">Total: {formatVal(tab2StaffCost)}</span>
+                <span className="dual-title">3. Production & Staff</span>
+                <span className="dual-badge">Total: {formatVal(tab2StaffCost + tab2PrintProdCost)}</span>
               </div>
               <div className="dual-controls-grid">
                 <div className="dual-control-item">
-                  <span className="dual-control-label">Headcount</span>
+                  <span className="dual-control-label">Staff Count ({employeeCount})</span>
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCount(Math.max(0, employeeCount - 1))} title="Remove assistant">-</button>
                     <div className="dual-input-span">
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={employeeCount === 0 ? '' : employeeCount} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={employeeCount === 0 ? '' : employeeCount}
                         onChange={(e) => setEmployeeCount(Math.max(0, parseInt(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -472,10 +516,10 @@ function App() {
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCost(Math.max(0, employeeCost - 50))} title="Lower pay">-</button>
                     <div className="dual-input-span">
                       <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={employeeCost === 0 ? '' : employeeCost} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={employeeCost === 0 ? '' : employeeCost}
                         onChange={(e) => setEmployeeCost(Math.max(0, parseFloat(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -484,25 +528,17 @@ function App() {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Mode 2 - Row 4: Print Prod Cost & Gas/Travel */}
-            <div className="factor-row-dual expense-row">
-              <div className="dual-header">
-                <span className="dual-title">4. Print Prod & Travel</span>
-                <span className="dual-badge">Total: {formatVal(tab2PrintProdCost + transportCost)}</span>
-              </div>
-              <div className="dual-controls-grid">
-                <div className="dual-control-item">
-                  <span className="dual-control-label">Prod / Copy</span>
-                  <div className="dual-stepper-box">
+              <div className="dual-controls-grid" style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid var(--border-color)' }}>
+                <div className="dual-control-item" style={{ gridColumn: 'span 2' }}>
+                  <span className="dual-control-label">Print Production Cost ({formatVal(printCost)}/copy × {printsSoldQty} pcs) = <strong>{formatVal(tab2PrintProdCost)}</strong></span>
+                  <div className="dual-stepper-box" style={{ width: '100%', maxWidth: '240px' }}>
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintCost(Math.max(0, printCost - 1))} title="Lower production cost">-</button>
                     <div className="dual-input-span">
                       <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={printCost === 0 ? '' : printCost} 
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={printCost === 0 ? '' : printCost}
                         onChange={(e) => setPrintCost(Math.max(0, parseFloat(e.target.value) || 0))}
                         placeholder="0"
                       />
@@ -510,23 +546,27 @@ function App() {
                     <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintCost(printCost + 1)} title="Higher production cost">+</button>
                   </div>
                 </div>
-                <div className="dual-control-item">
-                  <span className="dual-control-label">Gas & Travel</span>
-                  <div className="dual-stepper-box">
-                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))} title="Lower travel cost">-</button>
-                    <div className="dual-input-span">
-                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input 
-                        type="number" 
-                        className="dual-input" 
-                        value={transportCost === 0 ? '' : transportCost} 
-                        onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                        placeholder="0"
-                      />
-                    </div>
-                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setTransportCost(transportCost + 200)} title="Higher travel cost">+</button>
-                  </div>
+              </div>
+            </div>
+
+            {/* Mode 2 - Row 4: Gas & Travel */}
+            <div className="factor-row expense-row">
+              <div className="factor-info">
+                <span className="factor-title">4. Gas & Travel</span>
+                <div className="factor-input-wrapper">
+                  <span className="currency-symbol">{currency}</span>
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={transportCost === 0 ? '' : transportCost}
+                    onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
                 </div>
+              </div>
+              <div className="row-steppers">
+                <button type="button" className="stepper-btn stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))} title="Lower travel cost">-</button>
+                <button type="button" className="stepper-btn stepper-plus" onClick={() => setTransportCost(transportCost + 200)} title="Higher travel cost">+</button>
               </div>
             </div>
 
@@ -536,10 +576,189 @@ function App() {
                 <span className="factor-title">5. Misc Fees</span>
                 <div className="factor-input-wrapper">
                   <span className="currency-symbol">{currency}</span>
-                  <input 
-                    type="number" 
-                    className="factor-input" 
-                    value={miscCost === 0 ? '' : miscCost} 
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={miscCost === 0 ? '' : miscCost}
+                    onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="row-steppers">
+                <button type="button" className="stepper-btn stepper-minus" onClick={() => setMiscCost(Math.max(0, miscCost - 100))}>- 100</button>
+                <button type="button" className="stepper-btn stepper-plus" onClick={() => setMiscCost(miscCost + 100)}>+ 100</button>
+              </div>
+            </div>
+          </>
+        ) : (
+          /* Mode 3 - Percentage Cut Mode */
+          <>
+            <div className="section-divider revenue-divider">
+              <span>💵 REVENUE & COMMISSION</span>
+            </div>
+
+            {/* Mode 3 - Row 1: Gross Photo Sales */}
+            <div className="factor-row-dual revenue-row">
+              <div className="dual-header">
+                <span className="dual-title">1. Gross Photo Sales</span>
+                <span className="dual-badge">Gross: {formatVal(tab3GrossRevenue)}</span>
+              </div>
+              <div className="dual-controls-grid">
+                <div className="dual-control-item">
+                  <span className="dual-control-label">Price / Copy</span>
+                  <div className="dual-stepper-box">
+                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setSellingPricePerPrint(Math.max(0, sellingPricePerPrint - 10))} title="Lower price">-</button>
+                    <div className="dual-input-span">
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={sellingPricePerPrint === 0 ? '' : sellingPricePerPrint}
+                        onChange={(e) => setSellingPricePerPrint(Math.max(0, parseFloat(e.target.value) || 0))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setSellingPricePerPrint(sellingPricePerPrint + 10)} title="Higher price">+</button>
+                  </div>
+                </div>
+                <div className="dual-control-item">
+                  <span className="dual-control-label">Copies Sold</span>
+                  <div className="dual-stepper-box">
+                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintsSoldQty(Math.max(0, printsSoldQty - 10))} title="Less copies">-</button>
+                    <div className="dual-input-span">
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={printsSoldQty === 0 ? '' : printsSoldQty}
+                        onChange={(e) => setPrintsSoldQty(Math.max(0, parseInt(e.target.value) || 0))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintsSoldQty(printsSoldQty + 10)} title="More copies">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="section-divider expense-divider">
+              <span>💸 OPERATIONAL EXPENSES</span>
+            </div>
+
+            {/* Mode 3 - Row 2: Organizer Cut (%) */}
+            <div className="factor-row expense-row">
+              <div className="factor-info">
+                <span className="factor-title">2. Organizer Cut (%)</span>
+                <div className="factor-input-wrapper">
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={commissionRate === 0 ? '' : commissionRate}
+                    onChange={(e) => setCommissionRate(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                  <span className="currency-symbol" style={{ marginLeft: '4px' }}>% ({formatVal(tab3OrganizerCut)})</span>
+                </div>
+              </div>
+              <div className="row-steppers">
+                <button type="button" className="stepper-btn stepper-minus" onClick={() => setCommissionRate(Math.max(0, commissionRate - 5))}>- 5%</button>
+                <button type="button" className="stepper-btn stepper-plus" onClick={() => setCommissionRate(commissionRate + 5)}>+ 5%</button>
+              </div>
+            </div>
+
+            {/* Mode 3 - Row 3: Staff Helpers + Print Production Cost (Dual Card) */}
+            <div className="factor-row-dual expense-row">
+              <div className="dual-header">
+                <span className="dual-title">3. Production & Staff</span>
+                <span className="dual-badge">Total: {formatVal(tab3StaffCost + tab3PrintProdCost)}</span>
+              </div>
+              <div className="dual-controls-grid">
+                <div className="dual-control-item">
+                  <span className="dual-control-label">Staff Count ({employeeCount})</span>
+                  <div className="dual-stepper-box">
+                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCount(Math.max(0, employeeCount - 1))} title="Remove assistant">-</button>
+                    <div className="dual-input-span">
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={employeeCount === 0 ? '' : employeeCount}
+                        onChange={(e) => setEmployeeCount(Math.max(0, parseInt(e.target.value) || 0))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setEmployeeCount(employeeCount + 1)} title="Add assistant">+</button>
+                  </div>
+                </div>
+                <div className="dual-control-item">
+                  <span className="dual-control-label">Pay per Helper</span>
+                  <div className="dual-stepper-box">
+                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCost(Math.max(0, employeeCost - 50))} title="Lower pay">-</button>
+                    <div className="dual-input-span">
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={employeeCost === 0 ? '' : employeeCost}
+                        onChange={(e) => setEmployeeCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setEmployeeCost(employeeCost + 50)} title="Higher pay">+</button>
+                  </div>
+                </div>
+              </div>
+              <div className="dual-controls-grid" style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid var(--border-color)' }}>
+                <div className="dual-control-item" style={{ gridColumn: 'span 2' }}>
+                  <span className="dual-control-label">Print Production Cost ({formatVal(printCost)}/copy × {printsSoldQty} pcs) = <strong>{formatVal(tab3PrintProdCost)}</strong></span>
+                  <div className="dual-stepper-box" style={{ width: '100%', maxWidth: '240px' }}>
+                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintCost(Math.max(0, printCost - 1))} title="Lower production cost">-</button>
+                    <div className="dual-input-span">
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
+                      <input
+                        type="number"
+                        className="dual-input"
+                        value={printCost === 0 ? '' : printCost}
+                        onChange={(e) => setPrintCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                        placeholder="0"
+                      />
+                    </div>
+                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintCost(printCost + 1)} title="Higher production cost">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mode 3 - Row 4: Gas & Travel */}
+            <div className="factor-row expense-row">
+              <div className="factor-info">
+                <span className="factor-title">4. Gas & Travel</span>
+                <div className="factor-input-wrapper">
+                  <span className="currency-symbol">{currency}</span>
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={transportCost === 0 ? '' : transportCost}
+                    onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div className="row-steppers">
+                <button type="button" className="stepper-btn stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))} title="Lower travel cost">-</button>
+                <button type="button" className="stepper-btn stepper-plus" onClick={() => setTransportCost(transportCost + 200)} title="Higher travel cost">+</button>
+              </div>
+            </div>
+
+            {/* Mode 3 - Row 5: Miscellaneous Fees */}
+            <div className="factor-row expense-row">
+              <div className="factor-info">
+                <span className="factor-title">5. Misc Fees</span>
+                <div className="factor-input-wrapper">
+                  <span className="currency-symbol">{currency}</span>
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={miscCost === 0 ? '' : miscCost}
                     onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
                     placeholder="0"
                   />
