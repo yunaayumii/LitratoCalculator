@@ -207,12 +207,16 @@ function App() {
       <main className="factors-container">
         {activeTab === 'package' ? (
           <>
+            <div className="section-divider revenue-divider">
+              <span>💵 REVENUE & INCOME</span>
+            </div>
+
             {/* Mode 1 - Row 1: Package Price */}
-            <div className="factor-row">
+            <div className="factor-row revenue-row">
               <div className="factor-info">
                 <span className="factor-title">1. Package Price</span>
                 <div className="factor-input-wrapper">
-                  <span style={{ color: 'var(--accent-green)', fontWeight: 800 }}>{currency}</span>
+                  <span className="currency-symbol">{currency}</span>
                   <input 
                     type="number" 
                     className="factor-input" 
@@ -228,8 +232,12 @@ function App() {
               </div>
             </div>
 
+            <div className="section-divider expense-divider">
+              <span>💸 OPERATIONAL EXPENSES</span>
+            </div>
+
             {/* Mode 1 - Row 2: Photo Prints (Volume & Cost per Print) */}
-            <div className="factor-row-dual">
+            <div className="factor-row-dual expense-row">
               <div className="dual-header">
                 <span className="dual-title">2. Photo Prints</span>
                 <span className="dual-badge">Total: {formatVal(tab1PrintsCost)}</span>
@@ -256,7 +264,7 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintCost(Math.max(0, printCost - 1))} title="Lower print cost">-</button>
                     <div className="dual-input-span">
-                      <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
                       <input 
                         type="number" 
                         className="dual-input" 
@@ -272,7 +280,7 @@ function App() {
             </div>
 
             {/* Mode 1 - Row 3: Staff Helpers (Headcount & Pay Rate) */}
-            <div className="factor-row-dual">
+            <div className="factor-row-dual expense-row">
               <div className="dual-header">
                 <span className="dual-title">3. Staff Helpers</span>
                 <span className="dual-badge">Total: {formatVal(tab1EmployeesCost)}</span>
@@ -299,7 +307,7 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCost(Math.max(0, employeeCost - 50))} title="Lower pay">-</button>
                     <div className="dual-input-span">
-                      <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
                       <input 
                         type="number" 
                         className="dual-input" 
@@ -315,11 +323,11 @@ function App() {
             </div>
 
             {/* Mode 1 - Row 4: Gas & Travel Fee */}
-            <div className="factor-row">
+            <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">4. Gas & Travel</span>
                 <div className="factor-input-wrapper">
-                  <span style={{ color: 'var(--accent-green)', fontWeight: 800 }}>{currency}</span>
+                  <span className="currency-symbol">{currency}</span>
                   <input 
                     type="number" 
                     className="factor-input" 
@@ -337,8 +345,12 @@ function App() {
           </>
         ) : (
           <>
+            <div className="section-divider revenue-divider">
+              <span>💵 REVENUE & INCOME</span>
+            </div>
+
             {/* Mode 2 - Row 1: Photo Sales (Price per Print & Copies Sold) */}
-            <div className="factor-row-dual">
+            <div className="factor-row-dual revenue-row">
               <div className="dual-header">
                 <span className="dual-title">1. Photo Sales</span>
                 <span className="dual-badge">Revenue: {formatVal(tab2Revenue)}</span>
@@ -349,7 +361,7 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setSellingPricePerPrint(Math.max(0, sellingPricePerPrint - 10))} title="Lower price">-</button>
                     <div className="dual-input-span">
-                      <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
                       <input 
                         type="number" 
                         className="dual-input" 
@@ -380,12 +392,16 @@ function App() {
               </div>
             </div>
 
+            <div className="section-divider expense-divider">
+              <span>💸 OPERATIONAL EXPENSES</span>
+            </div>
+
             {/* Mode 2 - Row 2: Space / Booth Rental Fee */}
-            <div className="factor-row">
+            <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">2. Space Rental Fee</span>
                 <div className="factor-input-wrapper">
-                  <span style={{ color: 'var(--accent-green)', fontWeight: 800 }}>{currency}</span>
+                  <span className="currency-symbol">{currency}</span>
                   <input 
                     type="number" 
                     className="factor-input" 
@@ -402,7 +418,7 @@ function App() {
             </div>
 
             {/* Mode 2 - Row 3: Staff Helpers (Headcount & Pay Rate) */}
-            <div className="factor-row-dual">
+            <div className="factor-row-dual expense-row">
               <div className="dual-header">
                 <span className="dual-title">3. Staff Helpers</span>
                 <span className="dual-badge">Total: {formatVal(tab2StaffCost)}</span>
@@ -429,7 +445,7 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setEmployeeCost(Math.max(0, employeeCost - 50))} title="Lower pay">-</button>
                     <div className="dual-input-span">
-                      <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
                       <input 
                         type="number" 
                         className="dual-input" 
@@ -445,7 +461,7 @@ function App() {
             </div>
 
             {/* Mode 2 - Row 4: Print Prod Cost & Gas/Travel */}
-            <div className="factor-row-dual">
+            <div className="factor-row-dual expense-row">
               <div className="dual-header">
                 <span className="dual-title">4. Print Prod & Travel</span>
                 <span className="dual-badge">Total: {formatVal(tab2PrintProdCost + transportCost)}</span>
@@ -456,7 +472,7 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintCost(Math.max(0, printCost - 1))} title="Lower production cost">-</button>
                     <div className="dual-input-span">
-                      <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
                       <input 
                         type="number" 
                         className="dual-input" 
@@ -473,7 +489,7 @@ function App() {
                   <div className="dual-stepper-box">
                     <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))} title="Lower travel cost">-</button>
                     <div className="dual-input-span">
-                      <span style={{ color: 'var(--accent-green)', fontSize: '0.85em' }}>{currency}</span>
+                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
                       <input 
                         type="number" 
                         className="dual-input" 

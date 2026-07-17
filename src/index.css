@@ -248,6 +248,85 @@ html, body {
   overflow-y: auto;
 }
 
+/* Section Dividers dividing Revenue/Income and Operational Expenses */
+.section-divider {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  font-size: 0.73rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: 8px;
+  margin-top: 2px;
+}
+
+.revenue-divider {
+  color: var(--accent-green);
+  background: var(--accent-green-light);
+  border-left: 3.5px solid var(--accent-green);
+}
+
+.expense-divider {
+  color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.08);
+  border-left: 3.5px solid var(--color-danger);
+}
+
+.currency-symbol {
+  font-weight: 800;
+}
+
+/* Revenue vs Expense Row Color Accents */
+.revenue-row:hover, .revenue-row:focus-within {
+  border-color: var(--accent-green);
+}
+
+.revenue-row .factor-input,
+.revenue-row .dual-input,
+.revenue-row .currency-symbol {
+  color: var(--accent-green);
+}
+
+.revenue-row .dual-badge {
+  background: var(--accent-green-light);
+  color: var(--accent-green);
+}
+
+.revenue-row .stepper-plus {
+  background: var(--accent-green);
+  box-shadow: 0 3px 10px rgba(5, 150, 105, 0.25);
+}
+
+.expense-row:hover, .expense-row:focus-within {
+  border-color: var(--color-danger);
+}
+
+.expense-row .factor-input,
+.expense-row .dual-input,
+.expense-row .currency-symbol {
+  color: var(--color-danger);
+}
+
+.expense-row .dual-badge {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--color-danger);
+}
+
+.expense-row .stepper-plus {
+  background: var(--color-danger);
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.25);
+}
+
+.expense-row .stepper-plus:hover {
+  background: #dc2626;
+}
+
+.expense-row .stepper-plus:active {
+  background: #b91c1c;
+}
+
 /* Single Factor Row Card */
 .factor-row {
   flex: 0 0 auto;
