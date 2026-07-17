@@ -24,12 +24,15 @@ Built with **React 19 + TypeScript + Vite** and deployed directly on **Vercel**,
 - 🎨 **Modern Light Green QC Aesthetic**  
   Inspired by clean mobile procedure wizards, featuring soft circular/pill minus (`-`) grey steppers and vibrant emerald green plus (`+`) steppers (`#059669`).
 
+- 🔄 **Tab Bar Mode Switcher (Two Distinct Business Models)**  
+  Switch instantly between two operational modes without losing your viewport limit:
+  - **💼 Package Rental Mode**: For when clients hire Litrato Studio for a fixed event package fee (`Package Price`).
+  - **🏪 Retail Booth Mode (Pay-Per-Print)**: For when Litrato Studio rents a venue space and profits based directly on individual copies/prints sold (`Selling Price` × `Copies Sold`). Includes a prominent **Break-Even Point readout** telling your mom exactly how many copies she must sell before making a profit!
+
 - ⚙️ **Dual-Factor Dynamic Adjusters**  
-  No hidden hardcoded constants! Every operational factor can be modified on the fly using either one-tap steppers or direct numeric input:
-  - **1. Package Price**: Adjust revenue in steps of `₱1,000` or type any amount directly.
-  - **2. Photo Prints**: Independently adjust both **Volume (`printQty`)** and **Cost per Print (`printCost`)**.
-  - **3. Staff Helpers**: Independently adjust both **Headcount (`employeeCount`)** and **Pay per Helper (`employeeCost`)**.
-  - **4. Gas & Travel**: Adjust flat travel/gas fees in steps of `₱200` or type directly.
+  No hidden hardcoded constants! Every operational factor across both modes can be modified right on the fly:
+  - **Package Mode**: Adjust `Package Price`, `Print Volume` & `Print Cost`, `Staff Headcount` & `Helper Pay`, and `Gas & Travel`.
+  - **Retail Booth Mode**: Adjust `Selling Price` & `Copies Sold`, `Space Rental Fee`, `Staff Headcount` & `Helper Pay`, and `Print Prod Cost` & `Gas/Travel`.
 
 - 🇵🇭 **Single Currency (`₱` PHP Exclusively)**  
   Streamlined exclusively for Philippine Pesos to eliminate confusing currency toggles.
