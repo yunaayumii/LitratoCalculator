@@ -41,11 +41,11 @@
 html, body {
   height: 100%;
   width: 100%;
-  overflow: hidden; /* STRICT 100% VIEWPORT LIMIT: NO VERTICAL SCROLLING */
+  overflow: hidden; /* STRICT 100% VIEWPORT LIMIT ON NORMAL SCREENS */
   background-color: var(--bg-main);
   color: var(--text-primary);
   font-family: var(--font-sans);
-  font-size: 16px;
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -57,18 +57,25 @@ html, body {
   width: 100%;
   max-width: 580px;
   margin: 0 auto;
-  padding: 10px 14px;
+  padding: 6px 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow: hidden;
-  gap: 8px;
+  overflow-y: auto; /* Fallback for ultra-short phone viewports with address bars */
+  gap: 6px;
 }
 
 @media (min-width: 640px) {
   #root {
-    padding: 16px 24px;
-    gap: 12px;
+    padding: 12px 20px;
+    gap: 8px;
+  }
+}
+
+@media (min-height: 700px) {
+  #root {
+    padding: 10px 16px;
+    gap: 8px;
   }
 }
 
@@ -78,22 +85,22 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 4px 6px;
+  padding: 1px 4px;
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--bg-surface);
-  padding: 6px 16px;
+  padding: 4px 12px;
   border-radius: 9999px;
   border: 1.5px solid var(--border-color);
   box-shadow: var(--shadow-sm);
 }
 
 .logo-text {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   color: var(--accent-green);
@@ -108,16 +115,16 @@ html, body {
   background: var(--bg-surface);
   border: 1.5px solid var(--border-color);
   border-radius: 9999px;
-  padding: 3px;
+  padding: 2px;
   box-shadow: var(--shadow-sm);
 }
 
 .tab-btn {
   flex: 1;
-  padding: 6px 12px;
+  padding: 5px 10px;
   border-radius: 9999px;
   font-weight: 800;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
   border: none;
   background: transparent;
@@ -127,13 +134,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 
-@media (min-height: 750px) {
+@media (min-height: 700px) {
   .tab-btn {
-    padding: 8px 16px;
-    font-size: 0.95rem;
+    padding: 6px 14px;
+    font-size: 0.88rem;
   }
 }
 
@@ -144,14 +151,14 @@ html, body {
 }
 
 .breakeven-tag {
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: var(--color-warning);
   background: rgba(217, 119, 6, 0.12);
-  padding: 2px 12px;
+  padding: 1px 10px;
   border-radius: 9999px;
   display: inline-block;
-  margin: 2px auto 4px auto;
+  margin: 1px auto 2px auto;
 }
 
 /* Top Prominent Profit Dashboard Card */
@@ -159,8 +166,8 @@ html, body {
   flex: 0 0 auto;
   border: 2px solid var(--accent-green);
   background: var(--bg-surface);
-  border-radius: 20px;
-  padding: 12px 16px;
+  border-radius: 16px;
+  padding: 8px 12px;
   text-align: center;
   box-shadow: var(--shadow-md);
   display: flex;
@@ -169,7 +176,7 @@ html, body {
 }
 
 .profit-main-label {
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--accent-green);
@@ -177,17 +184,17 @@ html, body {
 }
 
 .profit-main-value {
-  font-size: 2.6rem; /* Large high-impact readout fitting compact screen */
+  font-size: 2.1rem; /* Compact high-impact readout */
   font-weight: 900;
   line-height: 1.1;
-  margin: 4px 0;
+  margin: 2px 0;
   letter-spacing: -0.03em;
   transition: color var(--transition-normal);
 }
 
-@media (min-height: 750px) {
+@media (min-height: 700px) {
   .profit-main-value {
-    font-size: 2.9rem;
+    font-size: 2.5rem;
   }
 }
 
@@ -208,9 +215,9 @@ html, body {
   justify-content: space-around;
   align-items: center;
   border-top: 1.5px solid var(--border-color);
-  padding-top: 8px;
-  margin-top: 4px;
-  font-size: 0.88rem;
+  padding-top: 5px;
+  margin-top: 3px;
+  font-size: 0.82rem;
   font-weight: 600;
 }
 
@@ -220,39 +227,40 @@ html, body {
 }
 
 .subbar-label {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   font-weight: 700;
 }
 
 .subbar-val {
-  font-size: 1rem;
+  font-size: 0.92rem;
   font-weight: 800;
 }
 
-/* Factors Container - Stretches inside available space */
+/* Factors Container - Stretches inside available space with fallback scroll */
 .factors-container {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
-  gap: 8px;
+  justify-content: flex-start;
+  gap: 6px;
   min-height: 0;
+  overflow-y: auto;
 }
 
 /* Single Factor Row Card */
 .factor-row {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   background: var(--bg-surface);
   border: 1.5px solid var(--border-color);
-  border-radius: 18px;
-  padding: 8px 14px;
+  border-radius: 14px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   transition: all var(--transition-fast);
-  min-height: 60px;
+  min-height: 44px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -270,7 +278,7 @@ html, body {
 }
 
 .factor-title {
-  font-size: 1.05rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: var(--text-primary);
   white-space: nowrap;
@@ -278,14 +286,14 @@ html, body {
   text-overflow: ellipsis;
 }
 
-@media (min-height: 750px) {
+@media (min-height: 700px) {
   .factor-title {
-    font-size: 1.15rem;
+    font-size: 1.02rem;
   }
 }
 
 .factor-desc {
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   font-weight: 600;
 }
@@ -294,16 +302,16 @@ html, body {
 .factor-input-wrapper {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .factor-input {
   background: transparent;
   border: none;
   color: var(--accent-green);
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 900;
-  width: 105px;
+  width: 90px;
   outline: none;
   font-family: var(--font-sans);
 }
@@ -311,19 +319,18 @@ html, body {
 .factor-input:focus {
   background: var(--bg-surface-elevated);
   border-radius: 6px;
-  padding: 2px 6px;
+  padding: 1px 4px;
 }
 
 /* Dual Factor Row Card (for Photo Prints and Staff Helpers) */
 .factor-row-dual {
-  flex: 1.3 1 auto;
+  flex: 0 0 auto;
   background: var(--bg-surface);
   border: 1.5px solid var(--border-color);
-  border-radius: 18px;
-  padding: 8px 14px;
+  border-radius: 14px;
+  padding: 6px 10px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   gap: 6px;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-sm);
@@ -341,7 +348,7 @@ html, body {
 }
 
 .dual-title {
-  font-size: 1.05rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: var(--text-primary);
 }
@@ -349,30 +356,30 @@ html, body {
 .dual-badge {
   background: var(--accent-green-light);
   color: var(--accent-green);
-  padding: 2px 10px;
+  padding: 1px 8px;
   border-radius: 9999px;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
 .dual-controls-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
 }
 
 .dual-control-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .dual-control-label {
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
 
 .dual-stepper-box {
@@ -382,16 +389,16 @@ html, body {
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-color);
   border-radius: 9999px;
-  padding: 2px;
+  padding: 1px;
 }
 
 .stepper-btn-mini {
-  height: 36px;
-  width: 40px;
-  min-width: 40px;
+  height: 32px;
+  width: 36px;
+  min-width: 36px;
   padding: 0;
   border-radius: 9999px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -407,35 +414,35 @@ html, body {
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: var(--text-primary);
   gap: 1px;
 }
 
 .dual-input {
-  width: 48px;
+  width: 44px;
   text-align: center;
   background: transparent;
   border: none;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 800;
   color: var(--text-primary);
   outline: none;
   font-family: var(--font-sans);
 }
 
-@media (min-height: 750px) {
+@media (min-height: 700px) {
   .dual-title {
-    font-size: 1.15rem;
+    font-size: 1.02rem;
   }
   .stepper-btn-mini {
-    height: 40px;
-    width: 44px;
-    min-width: 44px;
-    font-size: 1.08rem;
+    height: 36px;
+    width: 40px;
+    min-width: 40px;
+    font-size: 1rem;
   }
   .dual-input, .dual-input-span {
-    font-size: 1.02rem;
+    font-size: 0.95rem;
   }
 }
 
@@ -443,15 +450,15 @@ html, body {
 .row-steppers {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .stepper-btn {
-  height: 44px;
-  min-width: 52px;
-  padding: 0 12px;
+  height: 36px;
+  min-width: 46px;
+  padding: 0 10px;
   border-radius: 9999px; /* Pill/Circle shape matching QC wizard */
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -462,11 +469,11 @@ html, body {
   border: none;
 }
 
-@media (min-height: 750px) {
+@media (min-height: 700px) {
   .stepper-btn {
-    height: 48px;
-    min-width: 58px;
-    font-size: 1.15rem;
+    height: 42px;
+    min-width: 52px;
+    font-size: 1.05rem;
   }
 }
 
@@ -506,27 +513,27 @@ html, body {
   flex: 0 0 auto;
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 12px;
+  gap: 8px;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  height: 50px;
+  gap: 6px;
+  height: 42px;
   border-radius: 9999px; /* Pill shaped just like QC reference buttons */
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.92rem;
   cursor: pointer;
   font-family: var(--font-sans);
   transition: all var(--transition-fast);
 }
 
-@media (min-height: 750px) {
+@media (min-height: 700px) {
   .action-btn {
-    height: 54px;
-    font-size: 1.08rem;
+    height: 48px;
+    font-size: 1rem;
   }
 }
 
