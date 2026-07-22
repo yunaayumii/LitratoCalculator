@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Camera,
   Copy,
   RefreshCw,
   CheckCircle2
@@ -194,7 +193,7 @@ function App() {
       {/* Compact Header Bar */}
       <header className="app-header" style={{ justifyContent: 'center' }}>
         <div className="logo-container">
-          <Camera size={22} color="var(--accent-green)" />
+          <img src="/litrato.svg" alt="Litrato Logo" style={{ height: '24px', width: 'auto' }} />
           <span className="logo-text">LITRATO STUDIO</span>
         </div>
       </header>
