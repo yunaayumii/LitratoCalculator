@@ -375,20 +375,16 @@ function App() {
             <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">4. Gas & Travel</span>
-                <div className="factor-input-wrapper">
-                  <span className="currency-symbol">{currency}</span>
-                  <input
-                    type="number"
-                    className="factor-input"
-                    value={transportCost === 0 ? '' : transportCost}
-                    onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0"
-                  />
-                </div>
               </div>
-              <div className="row-steppers">
-                <button type="button" className="stepper-btn stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))}>- 200</button>
-                <button type="button" className="stepper-btn stepper-plus" onClick={() => setTransportCost(transportCost + 200)}>+ 200</button>
+              <div className="factor-input-wrapper">
+                <span className="currency-symbol">{currency}</span>
+                <input
+                  type="number"
+                  className="factor-input"
+                  value={transportCost === 0 ? '' : transportCost}
+                  onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                  placeholder="0"
+                />
               </div>
             </div>
 
@@ -396,20 +392,16 @@ function App() {
             <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">5. Misc Fees</span>
-                <div className="factor-input-wrapper">
-                  <span className="currency-symbol">{currency}</span>
-                  <input
-                    type="number"
-                    className="factor-input"
-                    value={miscCost === 0 ? '' : miscCost}
-                    onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0"
-                  />
-                </div>
               </div>
-              <div className="row-steppers">
-                <button type="button" className="stepper-btn stepper-minus" onClick={() => setMiscCost(Math.max(0, miscCost - 100))}>- 100</button>
-                <button type="button" className="stepper-btn stepper-plus" onClick={() => setMiscCost(miscCost + 100)}>+ 100</button>
+              <div className="factor-input-wrapper">
+                <span className="currency-symbol">{currency}</span>
+                <input
+                  type="number"
+                  className="factor-input"
+                  value={miscCost === 0 ? '' : miscCost}
+                  onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                  placeholder="0"
+                />
               </div>
             </div>
           </>
@@ -553,20 +545,16 @@ function App() {
             <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">4. Gas & Travel</span>
-                <div className="factor-input-wrapper">
-                  <span className="currency-symbol">{currency}</span>
-                  <input
-                    type="number"
-                    className="factor-input"
-                    value={transportCost === 0 ? '' : transportCost}
-                    onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0"
-                  />
-                </div>
               </div>
-              <div className="row-steppers">
-                <button type="button" className="stepper-btn stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))} title="Lower travel cost">-</button>
-                <button type="button" className="stepper-btn stepper-plus" onClick={() => setTransportCost(transportCost + 200)} title="Higher travel cost">+</button>
+              <div className="factor-input-wrapper">
+                <span className="currency-symbol">{currency}</span>
+                <input
+                  type="number"
+                  className="factor-input"
+                  value={transportCost === 0 ? '' : transportCost}
+                  onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                  placeholder="0"
+                />
               </div>
             </div>
 
@@ -574,20 +562,16 @@ function App() {
             <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">5. Misc Fees</span>
-                <div className="factor-input-wrapper">
-                  <span className="currency-symbol">{currency}</span>
-                  <input
-                    type="number"
-                    className="factor-input"
-                    value={miscCost === 0 ? '' : miscCost}
-                    onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0"
-                  />
-                </div>
               </div>
-              <div className="row-steppers">
-                <button type="button" className="stepper-btn stepper-minus" onClick={() => setMiscCost(Math.max(0, miscCost - 100))}>- 100</button>
-                <button type="button" className="stepper-btn stepper-plus" onClick={() => setMiscCost(miscCost + 100)}>+ 100</button>
+              <div className="factor-input-wrapper">
+                <span className="currency-symbol">{currency}</span>
+                <input
+                  type="number"
+                  className="factor-input"
+                  value={miscCost === 0 ? '' : miscCost}
+                  onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                  placeholder="0"
+                />
               </div>
             </div>
           </>
@@ -732,20 +716,16 @@ function App() {
             <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">4. Gas & Travel</span>
-                <div className="factor-input-wrapper">
-                  <span className="currency-symbol">{currency}</span>
-                  <input
-                    type="number"
-                    className="factor-input"
-                    value={transportCost === 0 ? '' : transportCost}
-                    onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0"
-                  />
-                </div>
               </div>
-              <div className="row-steppers">
-                <button type="button" className="stepper-btn stepper-minus" onClick={() => setTransportCost(Math.max(0, transportCost - 200))} title="Lower travel cost">-</button>
-                <button type="button" className="stepper-btn stepper-plus" onClick={() => setTransportCost(transportCost + 200)} title="Higher travel cost">+</button>
+              <div className="factor-input-wrapper">
+                <span className="currency-symbol">{currency}</span>
+                <input
+                  type="number"
+                  className="factor-input"
+                  value={transportCost === 0 ? '' : transportCost}
+                  onChange={(e) => setTransportCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                  placeholder="0"
+                />
               </div>
             </div>
 
@@ -753,20 +733,16 @@ function App() {
             <div className="factor-row expense-row">
               <div className="factor-info">
                 <span className="factor-title">5. Misc Fees</span>
-                <div className="factor-input-wrapper">
-                  <span className="currency-symbol">{currency}</span>
-                  <input
-                    type="number"
-                    className="factor-input"
-                    value={miscCost === 0 ? '' : miscCost}
-                    onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                    placeholder="0"
-                  />
-                </div>
               </div>
-              <div className="row-steppers">
-                <button type="button" className="stepper-btn stepper-minus" onClick={() => setMiscCost(Math.max(0, miscCost - 100))}>- 100</button>
-                <button type="button" className="stepper-btn stepper-plus" onClick={() => setMiscCost(miscCost + 100)}>+ 100</button>
+              <div className="factor-input-wrapper">
+                <span className="currency-symbol">{currency}</span>
+                <input
+                  type="number"
+                  className="factor-input"
+                  value={miscCost === 0 ? '' : miscCost}
+                  onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
+                  placeholder="0"
+                />
               </div>
             </div>
           </>
