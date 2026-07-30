@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { toBlob } from 'html-to-image';
 import {
   Copy,
   RefreshCw,
-  CheckCircle2,
   Plus,
-  Trash2
+  Trash2,
+  Share2
 } from 'lucide-react';
 
 export interface CustomMiscFee {
@@ -26,6 +27,8 @@ export interface CustomRevenueItem {
 }
 
 function App() {
+  const appCardRef = useRef<HTMLDivElement>(null);
+
   // Fixed currency symbol (Philippine Peso only)
   const currency = '₱';
 
@@ -311,6 +314,46 @@ ${miscText}
     }).catch(() => {
       triggerToast('Could not copy. Please copy manually.');
     });
+  };
+
+  // Export graphic image summary / Mobile Share PNG
+  const handleExportImage = async () => {
+    if (!appCardRef.current) return;
+    triggerToast('Generating image snapshot...');
+
+    try {
+      const blob = await toBlob(appCardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: '#f8fafc'
+      });
+
+      if (!blob) {
+        throw new Error('Failed to generate image blob');
+      }
+
+      const fileName = `Litrato_Profit_Report_${activeTab}_${Date.now()}.png`;
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'Litrato Profit Summary',
+          text: `Litrato Studio Profit Report (${activeTab.toUpperCase()} mode)`,
+          files: [file]
+        });
+        triggerToast('Shared image report successfully!');
+      } else {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+        triggerToast('Saved image card to downloads!');
+      }
+    } catch (err) {
+      console.error('Export image error:', err);
+      triggerToast('Could not save image. Try taking a screenshot.');
+    }
   };
 
   // Reset to defaults
@@ -858,11 +901,10 @@ ${miscText}
   };
 
   return (
-    <>
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }} ref={appCardRef}>
       {/* Toast message notifications */}
       <div className={`toast-msg ${showToast ? 'show' : ''}`}>
-        <CheckCircle2 size={18} style={{ verticalAlign: 'middle', marginRight: '6px', display: 'inline' }} />
-        {toastMessage}
+        <span>✅ {toastMessage}</span>
       </div>
 
       {/* Compact Header Bar */}
@@ -1296,15 +1338,19 @@ ${miscText}
       {/* Bottom Action Bar */}
       <footer className="actions-bar">
         <button type="button" className="action-btn btn-primary" onClick={copyReportToClipboard}>
-          <Copy size={20} />
-          <span>Copy Summary</span>
+          <Copy size={18} />
+          <span>Copy Text</span>
+        </button>
+        <button type="button" className="action-btn btn-success" onClick={handleExportImage}>
+          <Share2 size={18} />
+          <span>Save Image</span>
         </button>
         <button type="button" className="action-btn btn-secondary" onClick={handleReset}>
-          <RefreshCw size={20} />
+          <RefreshCw size={18} />
           <span>Reset</span>
         </button>
       </footer>
-    </>
+    </div>
   );
 }
 

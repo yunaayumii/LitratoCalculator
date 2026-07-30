@@ -591,19 +591,20 @@ html, body {
 .actions-bar {
   flex: 0 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  height: 42px;
+  gap: 4px;
+  height: 38px;
   border-radius: 9999px; /* Pill shaped just like QC reference buttons */
   font-weight: 800;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   cursor: pointer;
   font-family: var(--font-sans);
   transition: all var(--transition-fast);
@@ -611,8 +612,9 @@ html, body {
 
 @media (min-height: 700px) {
   .action-btn {
-    height: 48px;
-    font-size: 1rem;
+    height: 44px;
+    font-size: 0.9rem;
+    gap: 6px;
   }
 }
 
@@ -624,11 +626,22 @@ html, body {
   background: var(--accent-green);
   border: none;
   color: #ffffff;
-  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+  box-shadow: 0 3px 12px rgba(5, 150, 105, 0.3);
 }
 
 .btn-primary:hover {
   background: var(--accent-green-hover);
+}
+
+.btn-success {
+  background: var(--bg-surface);
+  border: 1.5px solid var(--accent-green);
+  color: var(--accent-green);
+  font-weight: 800;
+}
+
+.btn-success:hover {
+  background: var(--accent-green-light);
 }
 
 .btn-secondary {
@@ -638,8 +651,8 @@ html, body {
 }
 
 .btn-secondary:hover {
-  border-color: var(--accent-green);
-  color: var(--accent-green);
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 /* Toast message notification (vibrant emerald green with no black background) */
