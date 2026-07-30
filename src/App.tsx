@@ -480,13 +480,29 @@ ${miscText}
                         <div className="inline-edit-dual">
                           <div className="inline-edit-field">
                             <span className="inline-label">Units Sold:</span>
-                            <input
-                              type="number"
-                              className="dual-input"
-                              style={{ width: '55px', textAlign: 'center', color: 'var(--accent-green)' }}
-                              value={item.unitCount === 0 ? '' : item.unitCount}
-                              onChange={(e) => handleUpdateCustomRevenueItem(item.id, 'unitCount', Math.max(0, parseInt(e.target.value) || 0))}
-                            />
+                            <div className="dual-stepper-box" style={{ background: 'var(--bg-surface)' }}>
+                              <button
+                                type="button"
+                                className="stepper-btn-mini stepper-minus"
+                                style={{ height: '26px', width: '28px', minWidth: '28px', fontSize: '0.85rem' }}
+                                onClick={() => handleUpdateCustomRevenueItem(item.id, 'unitCount', Math.max(0, item.unitCount - 1))}
+                                title="Decrease units"
+                              >-</button>
+                              <input
+                                type="number"
+                                className="dual-input"
+                                style={{ width: '38px', textAlign: 'center', color: 'var(--accent-green)', fontSize: '0.85rem' }}
+                                value={item.unitCount === 0 ? '' : item.unitCount}
+                                onChange={(e) => handleUpdateCustomRevenueItem(item.id, 'unitCount', Math.max(0, parseInt(e.target.value) || 0))}
+                              />
+                              <button
+                                type="button"
+                                className="stepper-btn-mini stepper-plus"
+                                style={{ height: '26px', width: '28px', minWidth: '28px', fontSize: '0.85rem', background: 'var(--accent-green)' }}
+                                onClick={() => handleUpdateCustomRevenueItem(item.id, 'unitCount', item.unitCount + 1)}
+                                title="Increase units"
+                              >+</button>
+                            </div>
                           </div>
                           <div className="inline-edit-field">
                             <span className="inline-label">Price/Unit:</span>
@@ -682,13 +698,29 @@ ${miscText}
                       <div className="inline-edit-dual">
                         <div className="inline-edit-field">
                           <span className="inline-label">Units:</span>
-                          <input
-                            type="number"
-                            className="dual-input"
-                            style={{ width: '55px', textAlign: 'center' }}
-                            value={item.unitCount === 0 ? '' : item.unitCount}
-                            onChange={(e) => handleUpdateCustomMiscFee(item.id, 'unitCount', Math.max(0, parseInt(e.target.value) || 0))}
-                          />
+                          <div className="dual-stepper-box" style={{ background: 'var(--bg-surface)' }}>
+                            <button
+                              type="button"
+                              className="stepper-btn-mini stepper-minus"
+                              style={{ height: '26px', width: '28px', minWidth: '28px', fontSize: '0.85rem' }}
+                              onClick={() => handleUpdateCustomMiscFee(item.id, 'unitCount', Math.max(0, item.unitCount - 1))}
+                              title="Decrease units"
+                            >-</button>
+                            <input
+                              type="number"
+                              className="dual-input"
+                              style={{ width: '38px', textAlign: 'center', color: 'var(--color-danger)', fontSize: '0.85rem' }}
+                              value={item.unitCount === 0 ? '' : item.unitCount}
+                              onChange={(e) => handleUpdateCustomMiscFee(item.id, 'unitCount', Math.max(0, parseInt(e.target.value) || 0))}
+                            />
+                            <button
+                              type="button"
+                              className="stepper-btn-mini stepper-plus"
+                              style={{ height: '26px', width: '28px', minWidth: '28px', fontSize: '0.85rem', background: 'var(--color-danger)' }}
+                              onClick={() => handleUpdateCustomMiscFee(item.id, 'unitCount', item.unitCount + 1)}
+                              title="Increase units"
+                            >+</button>
+                          </div>
                         </div>
                         <div className="inline-edit-field">
                           <span className="inline-label">Price/Unit:</span>
