@@ -16,6 +16,15 @@ export interface CustomMiscFee {
   unitPrice: number;
 }
 
+export interface CustomRevenueItem {
+  id: string;
+  name: string;
+  type: 'flat' | 'unit';
+  amount: number;
+  unitCount: number;
+  unitPrice: number;
+}
+
 function App() {
   // Fixed currency symbol (Philippine Peso only)
   const currency = '₱';
@@ -50,6 +59,17 @@ function App() {
   const [newFeeAmount, setNewFeeAmount] = useState<number>(0);
   const [newFeeUnitCount, setNewFeeUnitCount] = useState<number>(1);
   const [newFeeUnitPrice, setNewFeeUnitPrice] = useState<number>(0);
+
+  // Custom Revenue Items dynamic state (with default Magnet Add-ons @ ₱50)
+  const [customRevenueItems, setCustomRevenueItems] = useState<CustomRevenueItem[]>([
+    { id: 'default-magnet', name: 'Magnet Add-ons', type: 'unit', amount: 0, unitCount: 0, unitPrice: 50 }
+  ]);
+  const [isAddingRevenueItem, setIsAddingRevenueItem] = useState<boolean>(false);
+  const [newRevName, setNewRevName] = useState<string>('');
+  const [newRevType, setNewRevType] = useState<'flat' | 'unit'>('unit');
+  const [newRevAmount, setNewRevAmount] = useState<number>(0);
+  const [newRevUnitCount, setNewRevUnitCount] = useState<number>(1);
+  const [newRevUnitPrice, setNewRevUnitPrice] = useState<number>(50);
 
   // Toast state
   const [toastMessage, setToastMessage] = useState<string>('');
@@ -101,8 +121,50 @@ function App() {
     }));
   };
 
+  // Add custom revenue product item
+  const handleAddCustomRevenueItem = () => {
+    const name = newRevName.trim() || 'Add-on Product';
+    const newItem: CustomRevenueItem = {
+      id: Date.now().toString(),
+      name,
+      type: newRevType,
+      amount: newRevAmount,
+      unitCount: newRevUnitCount,
+      unitPrice: newRevUnitPrice
+    };
+    setCustomRevenueItems([...customRevenueItems, newItem]);
+    setNewRevName('');
+    setNewRevAmount(0);
+    setNewRevUnitCount(1);
+    setNewRevUnitPrice(50);
+    setIsAddingRevenueItem(false);
+    triggerToast(`Added product: ${name}`);
+  };
+
+  // Remove custom revenue product item
+  const handleRemoveCustomRevenueItem = (id: string) => {
+    const target = customRevenueItems.find(r => r.id === id);
+    setCustomRevenueItems(customRevenueItems.filter(r => r.id !== id));
+    triggerToast(`Removed: ${target?.name || 'product'}`);
+  };
+
+  // Update inline custom revenue product item
+  const handleUpdateCustomRevenueItem = (id: string, field: keyof CustomRevenueItem, value: any) => {
+    setCustomRevenueItems(customRevenueItems.map(item => {
+      if (item.id === id) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    }));
+  };
+
   // Compute Total Misc Expenses (Base + Custom Items)
   const totalMiscCost = miscCost + customMiscFees.reduce((sum, item) => {
+    return sum + (item.type === 'flat' ? item.amount : item.unitCount * item.unitPrice);
+  }, 0);
+
+  // Compute Total Custom Product Revenue
+  const totalCustomRevenue = customRevenueItems.reduce((sum, item) => {
     return sum + (item.type === 'flat' ? item.amount : item.unitCount * item.unitPrice);
   }, 0);
 
@@ -114,7 +176,8 @@ function App() {
   const tab1ProfitMargin = rentalPrice > 0 ? (tab1NetProfit / rentalPrice) * 100 : 0;
 
   // Math logic: Mode 2 (Retail Booth / Copies Mode)
-  const tab2Revenue = sellingPricePerPrint * printsSoldQty;
+  const tab2PhotoSales = sellingPricePerPrint * printsSoldQty;
+  const tab2Revenue = tab2PhotoSales + totalCustomRevenue;
   const tab2PrintProdCost = printCost * printsSoldQty;
   const tab2StaffCost = employeeCost * employeeCount;
   const tab2TotalExpenses = spaceRentalCost + tab2PrintProdCost + tab2StaffCost + transportCost + totalMiscCost;
@@ -122,7 +185,8 @@ function App() {
   const tab2ProfitMargin = tab2Revenue > 0 ? (tab2NetProfit / tab2Revenue) * 100 : 0;
 
   // Math logic: Mode 3 (Percentage Cut Mode)
-  const tab3GrossRevenue = sellingPricePerPrint * printsSoldQty;
+  const tab3GrossPhotoSales = sellingPricePerPrint * printsSoldQty;
+  const tab3GrossRevenue = tab3GrossPhotoSales + totalCustomRevenue;
   const tab3OrganizerCut = tab3GrossRevenue * (commissionRate / 100);
   const tab3PrintProdCost = printCost * printsSoldQty;
   const tab3StaffCost = employeeCost * employeeCount;
@@ -130,9 +194,10 @@ function App() {
   const tab3NetProfit = tab3GrossRevenue - tab3TotalExpenses;
   const tab3ProfitMargin = tab3GrossRevenue > 0 ? (tab3NetProfit / tab3GrossRevenue) * 100 : 0;
 
-  // Break-even copies needed to cover fixed overhead (space + staff + travel + total misc)
+  // Break-even copies needed to cover remaining fixed overhead after custom revenue
+  const netOverheadToCover = Math.max(0, (spaceRentalCost + tab2StaffCost + transportCost + totalMiscCost) - totalCustomRevenue);
   const breakEvenCopies = (sellingPricePerPrint - printCost) > 0
-    ? Math.ceil((spaceRentalCost + tab2StaffCost + transportCost + totalMiscCost) / (sellingPricePerPrint - printCost))
+    ? Math.ceil(netOverheadToCover / (sellingPricePerPrint - printCost))
     : 0;
 
   // Active dashboard metrics
@@ -144,6 +209,27 @@ function App() {
   // Format currency helper
   const formatVal = (val: number) => {
     return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
+
+  // Format revenue breakdown text for clipboard report
+  const getRevenueBreakdownText = (basePhotoSales: number) => {
+    let text = `💵 Photo Sales (${printsSoldQty} copies @ ${formatVal(sellingPricePerPrint)}): ${formatVal(basePhotoSales)}`;
+    if (customRevenueItems.length > 0) {
+      customRevenueItems.forEach(item => {
+        const itemTotal = item.type === 'flat' ? item.amount : item.unitCount * item.unitPrice;
+        if (itemTotal > 0 || item.unitCount > 0) {
+          if (item.type === 'flat') {
+            text += `\n• ${item.name} (Flat Add-on): ${formatVal(item.amount)}`;
+          } else {
+            text += `\n• ${item.name} (${item.unitCount} pcs @ ${formatVal(item.unitPrice)}): ${formatVal(itemTotal)}`;
+          }
+        }
+      });
+      if (totalCustomRevenue > 0) {
+        text += `\n💰 TOTAL REVENUE: ${formatVal(basePhotoSales + totalCustomRevenue)}`;
+      }
+    }
+    return text;
   };
 
   // Format misc breakdown text for clipboard report
@@ -185,7 +271,7 @@ ${miscText}
 --------------------------------------`;
     } else if (activeTab === 'retail') {
       reportText = `🏪 --- LITRATO RETAIL BOOTH REPORT ---
-💵 Photo Sales (${printsSoldQty} copies @ ${formatVal(sellingPricePerPrint)}): ${formatVal(tab2Revenue)}
+${getRevenueBreakdownText(tab2PhotoSales)}
 
 💸 EXPENSES BREAKDOWN:
 • Space / Booth Rental: ${formatVal(spaceRentalCost)}
@@ -201,7 +287,7 @@ ${miscText}
 --------------------------------------`;
     } else {
       reportText = `✂️ --- LITRATO PERCENTAGE CUT REPORT ---
-💵 Gross Photo Sales (${printsSoldQty} copies @ ${formatVal(sellingPricePerPrint)}): ${formatVal(tab3GrossRevenue)}
+${getRevenueBreakdownText(tab3GrossPhotoSales)}
 
 💸 EXPENSES BREAKDOWN:
 • Organizer Cut (${commissionRate}%): ${formatVal(tab3OrganizerCut)}
@@ -231,6 +317,15 @@ ${miscText}
     setNewFeeAmount(0);
     setNewFeeUnitCount(1);
     setNewFeeUnitPrice(0);
+
+    setCustomRevenueItems([
+      { id: 'default-magnet', name: 'Magnet Add-ons', type: 'unit', amount: 0, unitCount: 0, unitPrice: 50 }
+    ]);
+    setIsAddingRevenueItem(false);
+    setNewRevName('');
+    setNewRevAmount(0);
+    setNewRevUnitCount(1);
+    setNewRevUnitPrice(50);
 
     if (activeTab === 'package') {
       setRentalPrice(15000);
@@ -269,6 +364,262 @@ ${miscText}
     if (val < 0) return 'negative';
     if (currentRevenue > 0 && (val / currentRevenue) < 0.3) return 'warning'; // low margin (<30%)
     return 'positive';
+  };
+
+  // Render Revenue Section with dynamic custom add-on product rows
+  const renderRevenueSection = () => {
+    const photoSalesSubtotal = sellingPricePerPrint * printsSoldQty;
+
+    return (
+      <>
+        <div className="section-divider revenue-divider">
+          <span>💵 REVENUE & INCOME</span>
+        </div>
+
+        {/* Row 1: Photo Sales */}
+        <div className="factor-row-dual revenue-row">
+          <div className="dual-header">
+            <span className="dual-title">1. Photo Sales</span>
+            <span className="dual-badge">Sales: {formatVal(photoSalesSubtotal)}</span>
+          </div>
+          <div className="dual-controls-grid">
+            <div className="dual-control-item">
+              <span className="dual-control-label">Price / Copy</span>
+              <div className="dual-stepper-box">
+                <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setSellingPricePerPrint(Math.max(0, sellingPricePerPrint - 10))} title="Lower price">-</button>
+                <div className="dual-input-span">
+                  <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
+                  <input
+                    type="number"
+                    className="dual-input"
+                    value={sellingPricePerPrint === 0 ? '' : sellingPricePerPrint}
+                    onChange={(e) => setSellingPricePerPrint(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setSellingPricePerPrint(sellingPricePerPrint + 10)} title="Higher price">+</button>
+              </div>
+            </div>
+            <div className="dual-control-item">
+              <span className="dual-control-label">Copies Sold</span>
+              <div className="dual-stepper-box">
+                <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintsSoldQty(Math.max(0, printsSoldQty - 10))} title="Less copies">-</button>
+                <div className="dual-input-span">
+                  <input
+                    type="number"
+                    className="dual-input"
+                    value={printsSoldQty === 0 ? '' : printsSoldQty}
+                    onChange={(e) => setPrintsSoldQty(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintsSoldQty(printsSoldQty + 10)} title="More copies">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: Add-on Products & Revenue */}
+        <div className="misc-fees-container revenue-row" style={{ marginTop: '0' }}>
+          <div className="misc-header">
+            <span className="factor-title">2. Add-on Products</span>
+            <span className="dual-badge" style={{ background: 'var(--accent-green-light)', color: 'var(--accent-green)' }}>
+              Add-ons: {formatVal(totalCustomRevenue)}
+            </span>
+          </div>
+
+          {/* Custom revenue products list */}
+          {customRevenueItems.length > 0 && (
+            <div className="custom-misc-list">
+              {customRevenueItems.map((item) => {
+                const itemSubtotal = item.type === 'flat' ? item.amount : item.unitCount * item.unitPrice;
+                return (
+                  <div key={item.id} className="custom-misc-card" style={{ borderColor: 'rgba(5, 150, 105, 0.25)' }}>
+                    <div className="custom-misc-top">
+                      <div className="custom-misc-info">
+                        <span className="custom-misc-name">{item.name}</span>
+                        <span className="custom-misc-type-tag" style={{ background: 'var(--accent-green-light)', color: 'var(--accent-green)' }}>
+                          {item.type === 'flat' ? 'Flat Revenue' : `${item.unitCount} pcs × ${formatVal(item.unitPrice)}`}
+                        </span>
+                      </div>
+                      <div className="custom-misc-right">
+                        <span className="custom-misc-amount" style={{ color: 'var(--accent-green)' }}>{formatVal(itemSubtotal)}</span>
+                        <button
+                          type="button"
+                          className="trash-btn"
+                          style={{ color: 'var(--text-muted)' }}
+                          onClick={() => handleRemoveCustomRevenueItem(item.id)}
+                          title="Delete product"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Inline edit controls */}
+                    <div className="custom-misc-edit-bar">
+                      {item.type === 'flat' ? (
+                        <div className="inline-edit-field">
+                          <span className="inline-label">Amount:</span>
+                          <div className="inline-input-box">
+                            <span className="currency-symbol" style={{ fontSize: '0.85em', color: 'var(--accent-green)' }}>{currency}</span>
+                            <input
+                              type="number"
+                              className="dual-input"
+                              style={{ width: '70px', textAlign: 'right', color: 'var(--accent-green)' }}
+                              value={item.amount === 0 ? '' : item.amount}
+                              onChange={(e) => handleUpdateCustomRevenueItem(item.id, 'amount', Math.max(0, parseFloat(e.target.value) || 0))}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="inline-edit-dual">
+                          <div className="inline-edit-field">
+                            <span className="inline-label">Units Sold:</span>
+                            <input
+                              type="number"
+                              className="dual-input"
+                              style={{ width: '55px', textAlign: 'center', color: 'var(--accent-green)' }}
+                              value={item.unitCount === 0 ? '' : item.unitCount}
+                              onChange={(e) => handleUpdateCustomRevenueItem(item.id, 'unitCount', Math.max(0, parseInt(e.target.value) || 0))}
+                            />
+                          </div>
+                          <div className="inline-edit-field">
+                            <span className="inline-label">Price/Unit:</span>
+                            <div className="inline-input-box">
+                              <span className="currency-symbol" style={{ fontSize: '0.85em', color: 'var(--accent-green)' }}>{currency}</span>
+                              <input
+                                type="number"
+                                className="dual-input"
+                                style={{ width: '65px', textAlign: 'right', color: 'var(--accent-green)' }}
+                                value={item.unitPrice === 0 ? '' : item.unitPrice}
+                                onChange={(e) => handleUpdateCustomRevenueItem(item.id, 'unitPrice', Math.max(0, parseFloat(e.target.value) || 0))}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Add Product Trigger Button / Inline Form */}
+          {!isAddingRevenueItem ? (
+            <button
+              type="button"
+              className="add-misc-trigger-btn add-revenue-trigger-btn"
+              onClick={() => setIsAddingRevenueItem(true)}
+            >
+              <Plus size={16} />
+              <span>Add Product / Revenue Item</span>
+            </button>
+          ) : (
+            <div className="add-misc-form-box" style={{ borderColor: 'var(--accent-green)' }}>
+              <span className="form-box-title">🎁 Add New Product / Revenue Item</span>
+
+              <div className="form-field-group">
+                <label className="form-field-label">Product Name</label>
+                <input
+                  type="text"
+                  className="form-text-input"
+                  placeholder="e.g. Magnet Add-ons, Keychain, Frames..."
+                  value={newRevName}
+                  onChange={(e) => setNewRevName(e.target.value)}
+                />
+              </div>
+
+              <div className="form-field-group">
+                <label className="form-field-label">Revenue Type</label>
+                <div className="type-toggle-grid">
+                  <button
+                    type="button"
+                    className={`type-btn ${newRevType === 'unit' ? 'active' : ''}`}
+                    onClick={() => setNewRevType('unit')}
+                  >
+                    📦 Units × Price (default ₱50)
+                  </button>
+                  <button
+                    type="button"
+                    className={`type-btn ${newRevType === 'flat' ? 'active' : ''}`}
+                    onClick={() => setNewRevType('flat')}
+                  >
+                    💵 Flat Revenue
+                  </button>
+                </div>
+              </div>
+
+              {newRevType === 'flat' ? (
+                <div className="form-field-group">
+                  <label className="form-field-label">Revenue Amount ({currency})</label>
+                  <div className="factor-input-wrapper">
+                    <span className="currency-symbol" style={{ color: 'var(--accent-green)' }}>{currency}</span>
+                    <input
+                      type="number"
+                      className="factor-input"
+                      style={{ color: 'var(--accent-green)' }}
+                      value={newRevAmount === 0 ? '' : newRevAmount}
+                      onChange={(e) => setNewRevAmount(Math.max(0, parseFloat(e.target.value) || 0))}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="form-dual-grid">
+                  <div className="form-field-group">
+                    <label className="form-field-label">Units Sold</label>
+                    <input
+                      type="number"
+                      className="dual-input"
+                      style={{ width: '100%', height: '36px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0 8px', fontSize: '0.95rem', color: 'var(--accent-green)' }}
+                      value={newRevUnitCount === 0 ? '' : newRevUnitCount}
+                      onChange={(e) => setNewRevUnitCount(Math.max(0, parseInt(e.target.value) || 0))}
+                      placeholder="0"
+                    />
+                  </div>
+                  <div className="form-field-group">
+                    <label className="form-field-label">Price per Unit ({currency})</label>
+                    <div className="factor-input-wrapper">
+                      <span className="currency-symbol" style={{ color: 'var(--accent-green)' }}>{currency}</span>
+                      <input
+                        type="number"
+                        className="factor-input"
+                        style={{ color: 'var(--accent-green)' }}
+                        value={newRevUnitPrice === 0 ? '' : newRevUnitPrice}
+                        onChange={(e) => setNewRevUnitPrice(Math.max(0, parseFloat(e.target.value) || 0))}
+                        placeholder="50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="form-actions-row">
+                <button
+                  type="button"
+                  className="form-btn-save"
+                  onClick={handleAddCustomRevenueItem}
+                >
+                  Save Product Item
+                </button>
+                <button
+                  type="button"
+                  className="form-btn-cancel"
+                  onClick={() => {
+                    setIsAddingRevenueItem(false);
+                    setNewRevName('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </>
+    );
   };
 
   // Render Miscellaneous Fees Card with dynamic custom rows
@@ -695,52 +1046,8 @@ ${miscText}
           </>
         ) : activeTab === 'retail' ? (
           <>
-            <div className="section-divider revenue-divider">
-              <span>💵 REVENUE & INCOME</span>
-            </div>
-
-            {/* Mode 2 - Row 1: Photo Sales (Price per Print & Copies Sold) */}
-            <div className="factor-row-dual revenue-row">
-              <div className="dual-header">
-                <span className="dual-title">1. Photo Sales</span>
-                <span className="dual-badge">Revenue: {formatVal(tab2Revenue)}</span>
-              </div>
-              <div className="dual-controls-grid">
-                <div className="dual-control-item">
-                  <span className="dual-control-label">Price / Copy</span>
-                  <div className="dual-stepper-box">
-                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setSellingPricePerPrint(Math.max(0, sellingPricePerPrint - 10))} title="Lower price">-</button>
-                    <div className="dual-input-span">
-                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input
-                        type="number"
-                        className="dual-input"
-                        value={sellingPricePerPrint === 0 ? '' : sellingPricePerPrint}
-                        onChange={(e) => setSellingPricePerPrint(Math.max(0, parseFloat(e.target.value) || 0))}
-                        placeholder="0"
-                      />
-                    </div>
-                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setSellingPricePerPrint(sellingPricePerPrint + 10)} title="Higher price">+</button>
-                  </div>
-                </div>
-                <div className="dual-control-item">
-                  <span className="dual-control-label">Copies Sold</span>
-                  <div className="dual-stepper-box">
-                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintsSoldQty(Math.max(0, printsSoldQty - 10))} title="Less copies">-</button>
-                    <div className="dual-input-span">
-                      <input
-                        type="number"
-                        className="dual-input"
-                        value={printsSoldQty === 0 ? '' : printsSoldQty}
-                        onChange={(e) => setPrintsSoldQty(Math.max(0, parseInt(e.target.value) || 0))}
-                        placeholder="0"
-                      />
-                    </div>
-                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintsSoldQty(printsSoldQty + 10)} title="More copies">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Mode 2 - Revenue & Add-on Products */}
+            {renderRevenueSection()}
 
             <div className="section-divider expense-divider">
               <span>💸 OPERATIONAL EXPENSES</span>
@@ -852,52 +1159,8 @@ ${miscText}
         ) : (
           /* Mode 3 - Percentage Cut Mode */
           <>
-            <div className="section-divider revenue-divider">
-              <span>💵 REVENUE & COMMISSION</span>
-            </div>
-
-            {/* Mode 3 - Row 1: Gross Photo Sales */}
-            <div className="factor-row-dual revenue-row">
-              <div className="dual-header">
-                <span className="dual-title">1. Gross Photo Sales</span>
-                <span className="dual-badge">Gross: {formatVal(tab3GrossRevenue)}</span>
-              </div>
-              <div className="dual-controls-grid">
-                <div className="dual-control-item">
-                  <span className="dual-control-label">Price / Copy</span>
-                  <div className="dual-stepper-box">
-                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setSellingPricePerPrint(Math.max(0, sellingPricePerPrint - 10))} title="Lower price">-</button>
-                    <div className="dual-input-span">
-                      <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
-                      <input
-                        type="number"
-                        className="dual-input"
-                        value={sellingPricePerPrint === 0 ? '' : sellingPricePerPrint}
-                        onChange={(e) => setSellingPricePerPrint(Math.max(0, parseFloat(e.target.value) || 0))}
-                        placeholder="0"
-                      />
-                    </div>
-                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setSellingPricePerPrint(sellingPricePerPrint + 10)} title="Higher price">+</button>
-                  </div>
-                </div>
-                <div className="dual-control-item">
-                  <span className="dual-control-label">Copies Sold</span>
-                  <div className="dual-stepper-box">
-                    <button type="button" className="stepper-btn-mini stepper-minus" onClick={() => setPrintsSoldQty(Math.max(0, printsSoldQty - 10))} title="Less copies">-</button>
-                    <div className="dual-input-span">
-                      <input
-                        type="number"
-                        className="dual-input"
-                        value={printsSoldQty === 0 ? '' : printsSoldQty}
-                        onChange={(e) => setPrintsSoldQty(Math.max(0, parseInt(e.target.value) || 0))}
-                        placeholder="0"
-                      />
-                    </div>
-                    <button type="button" className="stepper-btn-mini stepper-plus" onClick={() => setPrintsSoldQty(printsSoldQty + 10)} title="More copies">+</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Mode 3 - Revenue & Add-on Products */}
+            {renderRevenueSection()}
 
             <div className="section-divider expense-divider">
               <span>💸 OPERATIONAL EXPENSES</span>

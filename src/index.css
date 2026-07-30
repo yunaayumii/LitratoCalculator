@@ -938,3 +938,12 @@ html, body {
   font-size: 0.82rem;
   cursor: pointer;
 }
+
+.add-revenue-trigger-btn {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.add-revenue-trigger-btn:hover {
+  background: var(--accent-green-light);
+}
