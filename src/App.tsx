@@ -49,10 +49,12 @@ function App() {
   const [employeeCost, setEmployeeCost] = useState<number>(500);
   const [employeeCount, setEmployeeCount] = useState<number>(2);
   const [transportCost, setTransportCost] = useState<number>(1000);
-  const [miscCost, setMiscCost] = useState<number>(500);
 
-  // Custom Misc Fees dynamic state
-  const [customMiscFees, setCustomMiscFees] = useState<CustomMiscFee[]>([]);
+  // Custom Misc Fees dynamic state (with default Food & Magnet Cost rows)
+  const [customMiscFees, setCustomMiscFees] = useState<CustomMiscFee[]>([
+    { id: 'default-food', name: 'Food / Crew Meals', type: 'unit', amount: 0, unitCount: 2, unitPrice: 150 },
+    { id: 'default-magnet-cost', name: 'Magnet Cost / Production', type: 'unit', amount: 0, unitCount: 0, unitPrice: 15 }
+  ]);
   const [isAddingMiscFee, setIsAddingMiscFee] = useState<boolean>(false);
   const [newFeeName, setNewFeeName] = useState<string>('');
   const [newFeeType, setNewFeeType] = useState<'flat' | 'unit'>('flat');
@@ -158,8 +160,8 @@ function App() {
     }));
   };
 
-  // Compute Total Misc Expenses (Base + Custom Items)
-  const totalMiscCost = miscCost + customMiscFees.reduce((sum, item) => {
+  // Compute Total Misc Expenses (Custom Items)
+  const totalMiscCost = customMiscFees.reduce((sum, item) => {
     return sum + (item.type === 'flat' ? item.amount : item.unitCount * item.unitPrice);
   }, 0);
 
@@ -235,15 +237,17 @@ function App() {
   // Format misc breakdown text for clipboard report
   const getMiscBreakdownText = () => {
     if (customMiscFees.length === 0) {
-      return `• Misc Fees: ${formatVal(miscCost)}`;
+      return `• Misc Expenses: ${formatVal(0)}`;
     }
-    let text = `• Base Misc Fee: ${formatVal(miscCost)}`;
+    let text = `• MISC EXPENSES BREAKDOWN:`;
     customMiscFees.forEach(fee => {
-      if (fee.type === 'flat') {
-        text += `\n• ${fee.name} (Flat): ${formatVal(fee.amount)}`;
-      } else {
-        const itemTotal = fee.unitCount * fee.unitPrice;
-        text += `\n• ${fee.name} (${fee.unitCount} units @ ${formatVal(fee.unitPrice)}): ${formatVal(itemTotal)}`;
+      const itemTotal = fee.type === 'flat' ? fee.amount : fee.unitCount * fee.unitPrice;
+      if (itemTotal > 0 || fee.unitCount > 0) {
+        if (fee.type === 'flat') {
+          text += `\n   • ${fee.name} (Flat): ${formatVal(fee.amount)}`;
+        } else {
+          text += `\n   • ${fee.name} (${fee.unitCount} pcs @ ${formatVal(fee.unitPrice)}): ${formatVal(itemTotal)}`;
+        }
       }
     });
     text += `\n• TOTAL MISC EXPENSES: ${formatVal(totalMiscCost)}`;
@@ -311,7 +315,10 @@ ${miscText}
 
   // Reset to defaults
   const handleReset = () => {
-    setCustomMiscFees([]);
+    setCustomMiscFees([
+      { id: 'default-food', name: 'Food / Crew Meals', type: 'unit', amount: 0, unitCount: 2, unitPrice: 150 },
+      { id: 'default-magnet-cost', name: 'Magnet Cost / Production', type: 'unit', amount: 0, unitCount: 0, unitPrice: 15 }
+    ]);
     setIsAddingMiscFee(false);
     setNewFeeName('');
     setNewFeeAmount(0);
@@ -334,7 +341,6 @@ ${miscText}
       setEmployeeCost(500);
       setEmployeeCount(2);
       setTransportCost(1000);
-      setMiscCost(500);
       triggerToast('Reset Package Rental defaults');
     } else if (activeTab === 'retail') {
       setSellingPricePerPrint(150);
@@ -344,7 +350,6 @@ ${miscText}
       setEmployeeCost(500);
       setEmployeeCount(2);
       setTransportCost(1000);
-      setMiscCost(500);
       triggerToast('Reset Retail Booth defaults');
     } else {
       setSellingPricePerPrint(150);
@@ -354,7 +359,6 @@ ${miscText}
       setEmployeeCost(500);
       setEmployeeCount(2);
       setTransportCost(1000);
-      setMiscCost(500);
       triggerToast('Reset Percentage Cut defaults');
     }
   };
@@ -629,21 +633,6 @@ ${miscText}
         <div className="misc-header">
           <span className="factor-title">5. Misc Fees</span>
           <span className="dual-badge">Total: {formatVal(totalMiscCost)}</span>
-        </div>
-
-        {/* Base General Misc Fee input */}
-        <div className="misc-base-row">
-          <span className="misc-base-label">Base Fee:</span>
-          <div className="factor-input-wrapper">
-            <span className="currency-symbol">{currency}</span>
-            <input
-              type="number"
-              className="factor-input"
-              value={miscCost === 0 ? '' : miscCost}
-              onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
-              placeholder="0"
-            />
-          </div>
         </div>
 
         {/* Added custom misc fee items list */}
