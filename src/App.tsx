@@ -2,8 +2,19 @@ import { useState } from 'react';
 import {
   Copy,
   RefreshCw,
-  CheckCircle2
+  CheckCircle2,
+  Plus,
+  Trash2
 } from 'lucide-react';
+
+export interface CustomMiscFee {
+  id: string;
+  name: string;
+  type: 'flat' | 'unit';
+  amount: number;
+  unitCount: number;
+  unitPrice: number;
+}
 
 function App() {
   // Fixed currency symbol (Philippine Peso only)
@@ -31,6 +42,15 @@ function App() {
   const [transportCost, setTransportCost] = useState<number>(1000);
   const [miscCost, setMiscCost] = useState<number>(500);
 
+  // Custom Misc Fees dynamic state
+  const [customMiscFees, setCustomMiscFees] = useState<CustomMiscFee[]>([]);
+  const [isAddingMiscFee, setIsAddingMiscFee] = useState<boolean>(false);
+  const [newFeeName, setNewFeeName] = useState<string>('');
+  const [newFeeType, setNewFeeType] = useState<'flat' | 'unit'>('flat');
+  const [newFeeAmount, setNewFeeAmount] = useState<number>(0);
+  const [newFeeUnitCount, setNewFeeUnitCount] = useState<number>(1);
+  const [newFeeUnitPrice, setNewFeeUnitPrice] = useState<number>(0);
+
   // Toast state
   const [toastMessage, setToastMessage] = useState<string>('');
   const [showToast, setShowToast] = useState<boolean>(false);
@@ -44,10 +64,52 @@ function App() {
     }, 2500);
   };
 
+  // Add custom misc fee item
+  const handleAddCustomMiscFee = () => {
+    const name = newFeeName.trim() || 'Misc Item';
+    const newItem: CustomMiscFee = {
+      id: Date.now().toString(),
+      name,
+      type: newFeeType,
+      amount: newFeeAmount,
+      unitCount: newFeeUnitCount,
+      unitPrice: newFeeUnitPrice
+    };
+    setCustomMiscFees([...customMiscFees, newItem]);
+    setNewFeeName('');
+    setNewFeeAmount(0);
+    setNewFeeUnitCount(1);
+    setNewFeeUnitPrice(0);
+    setIsAddingMiscFee(false);
+    triggerToast(`Added misc fee: ${name}`);
+  };
+
+  // Remove custom misc fee item
+  const handleRemoveCustomMiscFee = (id: string) => {
+    const target = customMiscFees.find(f => f.id === id);
+    setCustomMiscFees(customMiscFees.filter(f => f.id !== id));
+    triggerToast(`Removed: ${target?.name || 'fee item'}`);
+  };
+
+  // Update inline custom misc fee item
+  const handleUpdateCustomMiscFee = (id: string, field: keyof CustomMiscFee, value: any) => {
+    setCustomMiscFees(customMiscFees.map(item => {
+      if (item.id === id) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    }));
+  };
+
+  // Compute Total Misc Expenses (Base + Custom Items)
+  const totalMiscCost = miscCost + customMiscFees.reduce((sum, item) => {
+    return sum + (item.type === 'flat' ? item.amount : item.unitCount * item.unitPrice);
+  }, 0);
+
   // Math logic: Mode 1 (Package Rental)
   const tab1PrintsCost = printCost * printQty;
   const tab1EmployeesCost = employeeCost * employeeCount;
-  const tab1TotalExpenses = tab1PrintsCost + tab1EmployeesCost + transportCost + miscCost;
+  const tab1TotalExpenses = tab1PrintsCost + tab1EmployeesCost + transportCost + totalMiscCost;
   const tab1NetProfit = rentalPrice - tab1TotalExpenses;
   const tab1ProfitMargin = rentalPrice > 0 ? (tab1NetProfit / rentalPrice) * 100 : 0;
 
@@ -55,7 +117,7 @@ function App() {
   const tab2Revenue = sellingPricePerPrint * printsSoldQty;
   const tab2PrintProdCost = printCost * printsSoldQty;
   const tab2StaffCost = employeeCost * employeeCount;
-  const tab2TotalExpenses = spaceRentalCost + tab2PrintProdCost + tab2StaffCost + transportCost + miscCost;
+  const tab2TotalExpenses = spaceRentalCost + tab2PrintProdCost + tab2StaffCost + transportCost + totalMiscCost;
   const tab2NetProfit = tab2Revenue - tab2TotalExpenses;
   const tab2ProfitMargin = tab2Revenue > 0 ? (tab2NetProfit / tab2Revenue) * 100 : 0;
 
@@ -64,13 +126,13 @@ function App() {
   const tab3OrganizerCut = tab3GrossRevenue * (commissionRate / 100);
   const tab3PrintProdCost = printCost * printsSoldQty;
   const tab3StaffCost = employeeCost * employeeCount;
-  const tab3TotalExpenses = tab3OrganizerCut + tab3PrintProdCost + tab3StaffCost + transportCost + miscCost;
+  const tab3TotalExpenses = tab3OrganizerCut + tab3PrintProdCost + tab3StaffCost + transportCost + totalMiscCost;
   const tab3NetProfit = tab3GrossRevenue - tab3TotalExpenses;
   const tab3ProfitMargin = tab3GrossRevenue > 0 ? (tab3NetProfit / tab3GrossRevenue) * 100 : 0;
 
-  // Break-even copies needed to cover fixed overhead (space + staff + travel + misc)
+  // Break-even copies needed to cover fixed overhead (space + staff + travel + total misc)
   const breakEvenCopies = (sellingPricePerPrint - printCost) > 0
-    ? Math.ceil((spaceRentalCost + tab2StaffCost + transportCost + miscCost) / (sellingPricePerPrint - printCost))
+    ? Math.ceil((spaceRentalCost + tab2StaffCost + transportCost + totalMiscCost) / (sellingPricePerPrint - printCost))
     : 0;
 
   // Active dashboard metrics
@@ -84,9 +146,29 @@ function App() {
     return `${currency}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
 
+  // Format misc breakdown text for clipboard report
+  const getMiscBreakdownText = () => {
+    if (customMiscFees.length === 0) {
+      return `• Misc Fees: ${formatVal(miscCost)}`;
+    }
+    let text = `• Base Misc Fee: ${formatVal(miscCost)}`;
+    customMiscFees.forEach(fee => {
+      if (fee.type === 'flat') {
+        text += `\n• ${fee.name} (Flat): ${formatVal(fee.amount)}`;
+      } else {
+        const itemTotal = fee.unitCount * fee.unitPrice;
+        text += `\n• ${fee.name} (${fee.unitCount} units @ ${formatVal(fee.unitPrice)}): ${formatVal(itemTotal)}`;
+      }
+    });
+    text += `\n• TOTAL MISC EXPENSES: ${formatVal(totalMiscCost)}`;
+    return text;
+  };
+
   // Copy report
   const copyReportToClipboard = () => {
     let reportText = '';
+    const miscText = getMiscBreakdownText();
+
     if (activeTab === 'package') {
       reportText = `📸 --- LITRATO PACKAGE RENTAL REPORT ---
 💵 Package Price (Revenue): ${formatVal(rentalPrice)}
@@ -95,7 +177,7 @@ function App() {
 • Photo Prints (${printQty} pcs @ ${formatVal(printCost)}): ${formatVal(tab1PrintsCost)}
 • Staff / Assistants (${employeeCount} people @ ${formatVal(employeeCost)}): ${formatVal(tab1EmployeesCost)}
 • Gas & Travel: ${formatVal(transportCost)}
-• Misc Fees: ${formatVal(miscCost)}
+${miscText}
 
 📊 TOTAL EXPENSES: ${formatVal(tab1TotalExpenses)}
 💰 YOUR TAKE-HOME PROFIT: ${formatVal(tab1NetProfit)}
@@ -110,7 +192,7 @@ function App() {
 • Print Production (${printsSoldQty} copies @ ${formatVal(printCost)}): ${formatVal(tab2PrintProdCost)}
 • Staff / Assistants (${employeeCount} people @ ${formatVal(employeeCost)}): ${formatVal(tab2StaffCost)}
 • Gas & Travel: ${formatVal(transportCost)}
-• Misc Fees: ${formatVal(miscCost)}
+${miscText}
 
 📊 TOTAL EXPENSES: ${formatVal(tab2TotalExpenses)}
 🎯 BREAK-EVEN POINT: ${breakEvenCopies} copies sold
@@ -126,7 +208,7 @@ function App() {
 • Print Production (${printsSoldQty} copies @ ${formatVal(printCost)}): ${formatVal(tab3PrintProdCost)}
 • Staff / Assistants (${employeeCount} people @ ${formatVal(employeeCost)}): ${formatVal(tab3StaffCost)}
 • Gas & Travel: ${formatVal(transportCost)}
-• Misc Fees: ${formatVal(miscCost)}
+${miscText}
 
 📊 TOTAL EXPENSES: ${formatVal(tab3TotalExpenses)}
 💰 YOUR TAKE-HOME PROFIT: ${formatVal(tab3NetProfit)}
@@ -143,6 +225,13 @@ function App() {
 
   // Reset to defaults
   const handleReset = () => {
+    setCustomMiscFees([]);
+    setIsAddingMiscFee(false);
+    setNewFeeName('');
+    setNewFeeAmount(0);
+    setNewFeeUnitCount(1);
+    setNewFeeUnitPrice(0);
+
     if (activeTab === 'package') {
       setRentalPrice(15000);
       setPrintCost(12);
@@ -180,6 +269,220 @@ function App() {
     if (val < 0) return 'negative';
     if (currentRevenue > 0 && (val / currentRevenue) < 0.3) return 'warning'; // low margin (<30%)
     return 'positive';
+  };
+
+  // Render Miscellaneous Fees Card with dynamic custom rows
+  const renderMiscFeesSection = () => {
+    return (
+      <div className="misc-fees-container expense-row">
+        <div className="misc-header">
+          <span className="factor-title">5. Misc Fees</span>
+          <span className="dual-badge">Total: {formatVal(totalMiscCost)}</span>
+        </div>
+
+        {/* Base General Misc Fee input */}
+        <div className="misc-base-row">
+          <span className="misc-base-label">Base Fee:</span>
+          <div className="factor-input-wrapper">
+            <span className="currency-symbol">{currency}</span>
+            <input
+              type="number"
+              className="factor-input"
+              value={miscCost === 0 ? '' : miscCost}
+              onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
+              placeholder="0"
+            />
+          </div>
+        </div>
+
+        {/* Added custom misc fee items list */}
+        {customMiscFees.length > 0 && (
+          <div className="custom-misc-list">
+            {customMiscFees.map((item) => {
+              const itemSubtotal = item.type === 'flat' ? item.amount : item.unitCount * item.unitPrice;
+              return (
+                <div key={item.id} className="custom-misc-card">
+                  <div className="custom-misc-top">
+                    <div className="custom-misc-info">
+                      <span className="custom-misc-name">{item.name}</span>
+                      <span className="custom-misc-type-tag">
+                        {item.type === 'flat' ? 'Flat Fee' : `${item.unitCount} pcs × ${formatVal(item.unitPrice)}`}
+                      </span>
+                    </div>
+                    <div className="custom-misc-right">
+                      <span className="custom-misc-amount">{formatVal(itemSubtotal)}</span>
+                      <button
+                        type="button"
+                        className="trash-btn"
+                        onClick={() => handleRemoveCustomMiscFee(item.id)}
+                        title="Delete this item"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Inline quick edit controls */}
+                  <div className="custom-misc-edit-bar">
+                    {item.type === 'flat' ? (
+                      <div className="inline-edit-field">
+                        <span className="inline-label">Amount:</span>
+                        <div className="inline-input-box">
+                          <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
+                          <input
+                            type="number"
+                            className="dual-input"
+                            style={{ width: '70px', textAlign: 'right' }}
+                            value={item.amount === 0 ? '' : item.amount}
+                            onChange={(e) => handleUpdateCustomMiscFee(item.id, 'amount', Math.max(0, parseFloat(e.target.value) || 0))}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="inline-edit-dual">
+                        <div className="inline-edit-field">
+                          <span className="inline-label">Units:</span>
+                          <input
+                            type="number"
+                            className="dual-input"
+                            style={{ width: '55px', textAlign: 'center' }}
+                            value={item.unitCount === 0 ? '' : item.unitCount}
+                            onChange={(e) => handleUpdateCustomMiscFee(item.id, 'unitCount', Math.max(0, parseInt(e.target.value) || 0))}
+                          />
+                        </div>
+                        <div className="inline-edit-field">
+                          <span className="inline-label">Price/Unit:</span>
+                          <div className="inline-input-box">
+                            <span className="currency-symbol" style={{ fontSize: '0.85em' }}>{currency}</span>
+                            <input
+                              type="number"
+                              className="dual-input"
+                              style={{ width: '65px', textAlign: 'right' }}
+                              value={item.unitPrice === 0 ? '' : item.unitPrice}
+                              onChange={(e) => handleUpdateCustomMiscFee(item.id, 'unitPrice', Math.max(0, parseFloat(e.target.value) || 0))}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Add Row Section */}
+        {!isAddingMiscFee ? (
+          <button
+            type="button"
+            className="add-misc-trigger-btn"
+            onClick={() => setIsAddingMiscFee(true)}
+          >
+            <Plus size={16} />
+            <span>Add Misc Fee Item</span>
+          </button>
+        ) : (
+          <div className="add-misc-form-box">
+            <span className="form-box-title">➕ Add New Misc Fee Item</span>
+
+            <div className="form-field-group">
+              <label className="form-field-label">Item Name</label>
+              <input
+                type="text"
+                className="form-text-input"
+                placeholder="e.g. Parking, Props, Backdrop..."
+                value={newFeeName}
+                onChange={(e) => setNewFeeName(e.target.value)}
+              />
+            </div>
+
+            <div className="form-field-group">
+              <label className="form-field-label">Fee Input Type</label>
+              <div className="type-toggle-grid">
+                <button
+                  type="button"
+                  className={`type-btn ${newFeeType === 'flat' ? 'active' : ''}`}
+                  onClick={() => setNewFeeType('flat')}
+                >
+                  💵 Flat Amount
+                </button>
+                <button
+                  type="button"
+                  className={`type-btn ${newFeeType === 'unit' ? 'active' : ''}`}
+                  onClick={() => setNewFeeType('unit')}
+                >
+                  📦 Units × Price
+                </button>
+              </div>
+            </div>
+
+            {newFeeType === 'flat' ? (
+              <div className="form-field-group">
+                <label className="form-field-label">Expense Amount ({currency})</label>
+                <div className="factor-input-wrapper">
+                  <span className="currency-symbol">{currency}</span>
+                  <input
+                    type="number"
+                    className="factor-input"
+                    value={newFeeAmount === 0 ? '' : newFeeAmount}
+                    onChange={(e) => setNewFeeAmount(Math.max(0, parseFloat(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="form-dual-grid">
+                <div className="form-field-group">
+                  <label className="form-field-label">Number of Units</label>
+                  <input
+                    type="number"
+                    className="dual-input"
+                    style={{ width: '100%', height: '36px', background: 'var(--bg-surface-elevated)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0 8px', fontSize: '0.95rem' }}
+                    value={newFeeUnitCount === 0 ? '' : newFeeUnitCount}
+                    onChange={(e) => setNewFeeUnitCount(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="form-field-group">
+                  <label className="form-field-label">Price per Unit ({currency})</label>
+                  <div className="factor-input-wrapper">
+                    <span className="currency-symbol">{currency}</span>
+                    <input
+                      type="number"
+                      className="factor-input"
+                      value={newFeeUnitPrice === 0 ? '' : newFeeUnitPrice}
+                      onChange={(e) => setNewFeeUnitPrice(Math.max(0, parseFloat(e.target.value) || 0))}
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="form-actions-row">
+              <button
+                type="button"
+                className="form-btn-save"
+                onClick={handleAddCustomMiscFee}
+              >
+                Save Item
+              </button>
+              <button
+                type="button"
+                className="form-btn-cancel"
+                onClick={() => {
+                  setIsAddingMiscFee(false);
+                  setNewFeeName('');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -387,22 +690,8 @@ function App() {
               </div>
             </div>
 
-            {/* Mode 1 - Row 5: Miscellaneous Fees */}
-            <div className="factor-row expense-row">
-              <div className="factor-info">
-                <span className="factor-title">5. Misc Fees</span>
-              </div>
-              <div className="factor-input-wrapper">
-                <span className="currency-symbol">{currency}</span>
-                <input
-                  type="number"
-                  className="factor-input"
-                  value={miscCost === 0 ? '' : miscCost}
-                  onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                  placeholder="0"
-                />
-              </div>
-            </div>
+            {/* Mode 1 - Row 5: Miscellaneous Fees Container */}
+            {renderMiscFeesSection()}
           </>
         ) : activeTab === 'retail' ? (
           <>
@@ -557,22 +846,8 @@ function App() {
               </div>
             </div>
 
-            {/* Mode 2 - Row 5: Miscellaneous Fees */}
-            <div className="factor-row expense-row">
-              <div className="factor-info">
-                <span className="factor-title">5. Misc Fees</span>
-              </div>
-              <div className="factor-input-wrapper">
-                <span className="currency-symbol">{currency}</span>
-                <input
-                  type="number"
-                  className="factor-input"
-                  value={miscCost === 0 ? '' : miscCost}
-                  onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                  placeholder="0"
-                />
-              </div>
-            </div>
+            {/* Mode 2 - Row 5: Miscellaneous Fees Container */}
+            {renderMiscFeesSection()}
           </>
         ) : (
           /* Mode 3 - Percentage Cut Mode */
@@ -728,22 +1003,8 @@ function App() {
               </div>
             </div>
 
-            {/* Mode 3 - Row 5: Miscellaneous Fees */}
-            <div className="factor-row expense-row">
-              <div className="factor-info">
-                <span className="factor-title">5. Misc Fees</span>
-              </div>
-              <div className="factor-input-wrapper">
-                <span className="currency-symbol">{currency}</span>
-                <input
-                  type="number"
-                  className="factor-input"
-                  value={miscCost === 0 ? '' : miscCost}
-                  onChange={(e) => setMiscCost(Math.max(0, parseFloat(e.target.value) || 0))}
-                  placeholder="0"
-                />
-              </div>
-            </div>
+            {/* Mode 3 - Row 5: Miscellaneous Fees Container */}
+            {renderMiscFeesSection()}
           </>
         )}
       </main>
