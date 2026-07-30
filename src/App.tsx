@@ -79,6 +79,7 @@ function App() {
   // Toast state
   const [toastMessage, setToastMessage] = useState<string>('');
   const [showToast, setShowToast] = useState<boolean>(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
 
   // Trigger temporary toast
   const triggerToast = (msg: string) => {
@@ -316,10 +317,14 @@ ${miscText}
     });
   };
 
-  // Export graphic image summary / Mobile Share PNG
+  // Export full-length graphic image card / Mobile Share PNG
   const handleExportImage = async () => {
     if (!appCardRef.current) return;
-    triggerToast('Generating image snapshot...');
+    triggerToast('Generating full report image...');
+    setIsExporting(true);
+
+    // Wait for DOM to expand to full height unclipped mode
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
     try {
       const blob = await toBlob(appCardRef.current, {
@@ -327,6 +332,8 @@ ${miscText}
         pixelRatio: 2,
         backgroundColor: '#f8fafc'
       });
+
+      setIsExporting(false);
 
       if (!blob) {
         throw new Error('Failed to generate image blob');
@@ -337,21 +344,22 @@ ${miscText}
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
-          title: 'Litrato Profit Summary',
+          title: 'Litrato Profit Summary Report',
           text: `Litrato Studio Profit Report (${activeTab.toUpperCase()} mode)`,
           files: [file]
         });
-        triggerToast('Shared image report successfully!');
+        triggerToast('Shared full report image!');
       } else {
         const link = document.createElement('a');
         link.download = fileName;
         link.href = URL.createObjectURL(blob);
         link.click();
         setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-        triggerToast('Saved image card to downloads!');
+        triggerToast('Full image saved to downloads!');
       }
     } catch (err) {
       console.error('Export image error:', err);
+      setIsExporting(false);
       triggerToast('Could not save image. Try taking a screenshot.');
     }
   };
@@ -901,7 +909,7 @@ ${miscText}
   };
 
   return (
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }} ref={appCardRef}>
+    <div className={`app-card-wrapper ${isExporting ? 'is-exporting' : ''}`} ref={appCardRef}>
       {/* Toast message notifications */}
       <div className={`toast-msg ${showToast ? 'show' : ''}`}>
         <span>✅ {toastMessage}</span>
