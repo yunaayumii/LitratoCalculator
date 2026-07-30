@@ -73,16 +73,20 @@ html, body {
   box-sizing: border-box;
 }
 
-/* Full-length image export mode (unclipped, clean report card layout) */
+/* Full-length image export mode (unclipped, clean report card layout across desktop & mobile) */
+body.is-exporting-active,
+body.is-exporting-active #root,
 .app-card-wrapper.is-exporting {
   height: auto !important;
   max-height: none !important;
+  min-height: 0 !important;
   overflow: visible !important;
   padding: 16px !important;
   background: var(--bg-app) !important;
   border-radius: 16px;
 }
 
+body.is-exporting-active .factors-container,
 .app-card-wrapper.is-exporting .factors-container {
   height: auto !important;
   max-height: none !important;
@@ -90,6 +94,10 @@ html, body {
   flex: 0 0 auto !important;
 }
 
+body.is-exporting-active .actions-bar,
+body.is-exporting-active .toast-msg,
+body.is-exporting-active .add-misc-trigger-btn,
+body.is-exporting-active .trash-btn,
 .app-card-wrapper.is-exporting .actions-bar,
 .app-card-wrapper.is-exporting .toast-msg,
 .app-card-wrapper.is-exporting .add-misc-trigger-btn,

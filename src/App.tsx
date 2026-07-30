@@ -322,18 +322,31 @@ ${miscText}
     if (!appCardRef.current) return;
     triggerToast('Generating full report image...');
     setIsExporting(true);
+    document.body.classList.add('is-exporting-active');
 
-    // Wait for DOM to expand to full height unclipped mode
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    // Wait for DOM to expand to full height unclipped mode across mobile browsers
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     try {
-      const blob = await toBlob(appCardRef.current, {
+      const node = appCardRef.current;
+      const fullHeight = node.scrollHeight;
+      const fullWidth = node.scrollWidth;
+
+      const blob = await toBlob(node, {
         cacheBust: true,
         pixelRatio: 2,
-        backgroundColor: '#f8fafc'
+        backgroundColor: '#f8fafc',
+        width: fullWidth,
+        height: fullHeight,
+        style: {
+          height: `${fullHeight}px`,
+          maxHeight: 'none',
+          overflow: 'visible'
+        }
       });
 
       setIsExporting(false);
+      document.body.classList.remove('is-exporting-active');
 
       if (!blob) {
         throw new Error('Failed to generate image blob');
@@ -360,6 +373,7 @@ ${miscText}
     } catch (err) {
       console.error('Export image error:', err);
       setIsExporting(false);
+      document.body.classList.remove('is-exporting-active');
       triggerToast('Could not save image. Try taking a screenshot.');
     }
   };
